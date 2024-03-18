@@ -1,0 +1,12 @@
+doctype html
+html
+  head
+    title= title
+    link(rel='stylesheet', href='/stylesheets/subject-list.css')
+  body
+    .page_title
+      강의 목록
+    .subject_list
+      each subject in subjects
+        li
+          a(href="/prof/#{subject.subject_link}") #{subject.subject_name}
