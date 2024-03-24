@@ -4,9 +4,8 @@ html
     title= title
     link(rel='stylesheet', href='/stylesheets/subject-list.css')
   body
-    .page_title
-      #{title}
+    .page_title #{title}
     .subject_list
       each subject in subjects
         li
-          a(href="/prof/#{subject.subject_link}") #{subject.subject_name}
+          a(href="/prof/#{subject.subject_code}") #{subject.subject_name}
