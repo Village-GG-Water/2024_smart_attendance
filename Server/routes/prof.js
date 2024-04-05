@@ -1,0 +1,32 @@
+var express = require('express');
+var router = express.Router();
+var data = require('../data/data');
+
+router.get('/subject-list', function (req, res, next) {
+  res.render('prof-subject-list', {
+    title: '강의 목록(교수)',
+    subjects: data,
+  });
+});
+
+router.get('/:subjectId', function (req, res, next) {
+  const subjectId = Number(req.params.subjectId);
+  let result = data.filter((x) => x.subject_id == subjectId);
+  if (result.length != 1) return res.sendStatus(500);
+  res.render('prof-subject', {
+    title: result[0].subject_name,
+    subject_id: result[0].subject_id,
+  });
+});
+
+router.post('/:subjectId', function (req, res, next) {
+  const subjectId = Number(req.params.subjectId);
+  const attendanceCode = req.body.attendanceCode;
+  const startTime = req.body.startTime;
+  result = data.filter((x) => x.subject_id == subjectId);
+  if (result.length != 1) return res.sendStatus(500);
+  result[0].attendance_code[attendanceCode] = startTime;
+  res.send();
+});
+
+module.exports = router;
