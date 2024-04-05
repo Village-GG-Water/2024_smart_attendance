@@ -1,0 +1,16 @@
+doctype html
+html
+  head
+    title= title
+    link(rel='stylesheet', href='/stylesheets/student-subject.css')
+  body
+    .page_title #{title}
+    form#attendance_form(action="#" method="post")
+      .form-group
+        label(for="student_name") 이름:  
+        input#student_name(type="text" name="name" required)
+      .form-group
+        label(for="student_id") 학번:  
+        input#student_id(type="number" name="studentId" required)
+    div(id=subject_id class="button_attendance") 출석 시작
+    script(src="/javascripts/student-subject.js")

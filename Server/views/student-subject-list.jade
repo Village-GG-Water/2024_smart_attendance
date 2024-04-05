@@ -1,0 +1,11 @@
+doctype html
+html
+  head
+    title= title
+    link(rel='stylesheet', href='/stylesheets/subject-list.css')
+  body
+    .page_title #{title}
+    .subject_list
+      each subject in subjects
+        li
+          a(href="/student/#{subject.subject_id}") #{subject.subject_name}
