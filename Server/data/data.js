@@ -3,22 +3,22 @@
 
 let data = [
   {
-    subject_id: 0,
-    subject_name: 'Algorithm',
+    subjectId: 0,
+    subjectName: 'Algorithm',
     students: [
-      { name: '박지환', id: '2019115876' },
-      { name: '홍길동', id: '2020754876' },
+      { name: '박지환', id: '2019115876', isAttended: false },
+      { name: '홍길동', id: '2020754876', isAttended: false },
     ],
-    attendance_code: {},
+    attendanceCode: {},
   },
   {
-    subject_id: 1,
-    subject_name: 'Operating System',
+    subjectId: 1,
+    subjectName: 'Operating System',
     students: [
-      { name: '박지환', id: '2019115876' },
-      { name: '홍길동', id: '2020754876' },
+      { name: '박지환', id: '2019115876', isAttended: true },
+      { name: '홍길동', id: '2020754876', isAttended: false },
     ],
-    attendance_code: {},
+    attendanceCode: {},
   },
 ];
 
