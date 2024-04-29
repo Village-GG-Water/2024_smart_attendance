@@ -26,6 +26,13 @@ router.post('/:subjectId', function (req, res, next) {
   result = data.filter((x) => x.subjectId == subjectId);
   if (result.length != 1) return res.sendStatus(500);
   result[0].attendance_code[attendanceCode] = startTime;
+  // console.log()
+  console.log(
+    '(교수) 출석 코드 수신: 과목ID, startTime, 출석코드',
+    subjectId,
+    startTime,
+    attendanceCode
+  );
   res.send();
 });
 
