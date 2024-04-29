@@ -28,13 +28,8 @@ router.post('/:subjectId', function (req, res, next) {
   let result1 = data.filter((x) => x.subjectId == subjectId);
   if (result1.length != 1) return res.sendStatus(500);
   // console.log()
-  console.log(
-    '(학생) 출석 코드 수신: 이름, 학번, startTime, 출석코드: ',
-    studentName,
-    studentId,
-    startTime,
-    attendanceCode
-  );
+  console.log('(학생) 출석 코드 수신: 이름, 학번, startTime, 출석코드: ');
+  console.log(studentName, studentId, startTime, attendanceCode);
   // #1. 유효한 학생인지 검증
   let result2 = result1[0].students.filter((x) => x.id == studentId);
   if (result2.length != 1 || result2[0].name != studentName)
