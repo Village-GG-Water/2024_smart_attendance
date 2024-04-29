@@ -56,6 +56,7 @@ function startAttendanceCheck(subjectid) {
   let attendanceDuration = 300; //second
   const startTime = Math.floor(Date.now() / 1000);
 
+  /*
   while (Math.floor(Date.now() / 1000) - startTime < attendanceDuration) {
     let currentAttendanceCode = generateAuthCode();
 
@@ -71,6 +72,8 @@ function startAttendanceCheck(subjectid) {
 
     playSignal(currentAttendanceCode);
   }
+  */
+  playSignal(subjectid, attendanceDuration, 0);
 }
 
 /**
@@ -78,11 +81,33 @@ function startAttendanceCheck(subjectid) {
  *
  * @param {String} attendanceCode 음파신호로 출력해야 하는 출결 인증 코드
  */
-function playSignal(attendanceCode) {
+async function playSignal(subjectid, attendanceDuration, count) {
+  if (attendanceDuration / 5 <= count) return;
+
+  // Auth code 생성 후 서버에 이를 전송
+  let currentAttendanceCode = generateAuthCode();
+  const requestForm = {
+    subjectId: subjectid,
+    attendanceCode: currentAttendanceCode,
+    startTime: Math.floor(Date.now() / 1000),
+  };
+  const request = new Request('/prof/' + subjectid.toString(), {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(requestForm),
+  });
+  const res = await fetch(request);
+  // 인증성공이면 서버에서 200 응답
+  if (res.status != 200) {
+    alert('오류 발생, 확인해주세요.');
+  }
+
   const ac = new (window.AudioContext || window.webkitAudioContext)();
   ac.resume();
 
-  const frequencySet = codeToFrequency(attendanceCode);
+  const frequencySet = codeToFrequency(currentAttendanceCode);
 
   const maxFrequency = 20000;
   const unitFrequency = 50;
@@ -113,8 +138,10 @@ function playSignal(attendanceCode) {
   osc.connect(gain).connect(ac.destination);
 
   osc.start();
-  sleep(5000);
-  osc.stop();
+  setTimeout(() => {
+    osc.stop();
+    playSignal(subjectid, attendanceDuration, count + 1);
+  }, 5000);
 }
 
 /**
@@ -172,8 +199,9 @@ function codeToFrequency(code) {
 
   return frequencySet;
 }
-
+/*
 function sleep(ms) {
   const wakeUpTime = Date.now() + ms;
   while (Date.now() < wakeUpTime) {}
 }
+*/
