@@ -25,3 +25,12 @@ body {
   border-style: solid;
   cursor: pointer;
 }
+
+.attendee_list_title {
+  margin-top: 3em;
+}
+
+#attendee_list {
+  margin-top: 1em;
+  list-style: none;
+}
