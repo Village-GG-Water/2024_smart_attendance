@@ -68,14 +68,14 @@ async function startAttendanceCheck(subjectid) {
       sleep(10);
       mediaRecorder.stop();
 
-      let inputAuthCode = frequencyToCode(
+      let inputAttendanceCode = frequencyToCode(
         dataArray,
         totalFrequencySet,
         threshold,
         analyser.fftSize
       );
 
-      attendanceCode = inputAuthCode; //TODO: input 오류 처리 과정 추가
+      attendanceCode = inputAttendanceCode; //TODO: input 오류 처리 과정 추가
 
       audioArray = [];
     }
@@ -143,7 +143,7 @@ function frequencyToCode(
   threshold,
   fftsize
 ) {
-  let authCode = "";
+  let attendanceCode = "";
 
   for (let i = 0; i < totalFrequencySet.length; i++) {
     const element = totalFrequencySet[i];
@@ -151,13 +151,13 @@ function frequencyToCode(
     let index = Math.floor((fftsize * element) / 24000); //24000: default sample rate
 
     if (inputFrequencySet[index] >= threshold) {
-      authCode += "1";
+      attendanceCode += "1";
     } else {
-      authCode += "0";
+      attendanceCode += "0";
     }
   }
 
-  return authCode;
+  return attendanceCode;
 }
 
 function sleep(ms) {

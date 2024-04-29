@@ -12,7 +12,7 @@ function startAttendanceCheck(subjectid) {
 
     const requestForm = {
       subjectid: subjectid,
-      attendanceCode: currentAuthCode,
+      attendanceCode: currentAttendanceCode,
       startTime: Math.floor(Date.now() / 1000),
     };
     new Request("/prof" + subjectid.toString(), {
@@ -20,20 +20,20 @@ function startAttendanceCheck(subjectid) {
       body: JSON.stringify(requestForm),
     });
 
-    playSignal(currentAuthCode);
+    playSignal(currentAttendanceCode);
   }
 }
 
 /**
- * Oscillator를 이용하여 frequency_set에 있는 주파수 전체를 소리로 출력하는 function
+ * Oscillator를 이용하여 attendanceCode를 소리로 출력하는 function
  *
- * @param {String} authCode 음파신호로 출력해야 하는 출결 인증 코드
+ * @param {String} attendanceCode 음파신호로 출력해야 하는 출결 인증 코드
  */
-function playSignal(authCode) {
+function playSignal(attendanceCode) {
   const ac = new (window.AudioContext || window.webkitAudioContext)();
   ac.resume();
 
-  const frequencySet = codeToFrequency(authCode);
+  const frequencySet = codeToFrequency(attendanceCode);
 
   const maxFrequency = 20000;
   const unitFrequency = 50;
