@@ -7,10 +7,10 @@ html
     .page_title #{title}
     form#attendance_form(action="#" method="post")
       .form-group
-        label(for="studentName") 이름:  
-        input#studentName(type="text" name="name" required)
+        label(for="student_name") 이름:  
+        input#student_name(type="text" name="name" required)
       .form-group
-        label(for="studentId") 학번:  
-        input#studentId(type="number" name="studentId" required)
+        label(for="student_id") 학번:  
+        input#student_id(type="number" name="student_id" required)
     div(id=subject_id class="button_attendance") 출석 시작
     script(src="/javascripts/student-subject.js")
