@@ -34,3 +34,18 @@ body {
   margin-top: 1em;
   list-style: none;
 }
+
+.current_attendance_code_title {
+  margin-top: 3em;
+}
+
+.current_attendance_code {
+  margin-top: 1em;
+  border-style: solid;
+  height: 3em;
+  width: 10em;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  text-align: center;
+}

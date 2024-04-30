@@ -1,14 +1,14 @@
 let buttonFlag = false;
 
 function changeButtonOn(btn) {
-  btn.innerHTML = "음파 생성 중";
-  btn.style.backgroundColor = "#4CAF50";
+  btn.innerHTML = '음파 생성 중';
+  btn.style.backgroundColor = '#4CAF50';
   startAttendanceCheck(btn.id);
 }
 
 function changeButtonOff(btn) {
-  btn.innerHTML = "출석 시작";
-  btn.style.backgroundColor = "#00FFFF";
+  btn.innerHTML = '출석 시작';
+  btn.style.backgroundColor = '#00FFFF';
 }
 
 function buttonClickHandler() {
@@ -21,26 +21,29 @@ function buttonClickHandler() {
   }
 }
 
-var btn = document.getElementsByClassName("button_attendance")[0];
-btn.addEventListener("click", buttonClickHandler);
+var btn = document.getElementsByClassName('button_attendance')[0];
+btn.addEventListener('click', buttonClickHandler);
+var attendanceCodeDisplay = document.getElementsByClassName(
+  'current_attendance_code'
+)[0];
 
 // 1초 간격 출석 학생 목록 업데이트
 const subjectId = btn.id;
-document.addEventListener("DOMContentLoaded", function () {
+document.addEventListener('DOMContentLoaded', function () {
   const updateAttendees = () => {
     fetch(`/attendees/${subjectId}`)
       .then((response) => response.json())
       .then((data) => {
-        const attendeeList = document.getElementById("attendee_list");
-        attendeeList.innerHTML = "";
+        const attendeeList = document.getElementById('attendee_list');
+        attendeeList.innerHTML = '';
 
         data.forEach((attendee) => {
-          const subDiv = document.createElement("div");
+          const subDiv = document.createElement('div');
           subDiv.textContent = `이름: ${attendee.name}, ID: ${attendee.id}`;
           attendeeList.appendChild(subDiv);
         });
       })
-      .catch((error) => console.error("Error:", error));
+      .catch((error) => console.error('Error:', error));
   };
 
   setInterval(updateAttendees, 1000);
@@ -54,25 +57,7 @@ document.addEventListener("DOMContentLoaded", function () {
  */
 function startAttendanceCheck(subjectid) {
   let attendanceDuration = 300; //second
-  const startTime = Math.floor(Date.now() / 1000);
 
-  /*
-  while (Math.floor(Date.now() / 1000) - startTime < attendanceDuration) {
-    let currentAttendanceCode = generateAuthCode();
-
-    const requestForm = {
-      subjectid: subjectid,
-      attendanceCode: currentAttendanceCode,
-      startTime: Math.floor(Date.now() / 1000),
-    };
-    new Request('/prof' + subjectid.toString(), {
-      method: 'POST',
-      body: JSON.stringify(requestForm),
-    });
-
-    playSignal(currentAttendanceCode);
-  }
-  */
   playSignal(subjectid, attendanceDuration, 0);
 }
 
@@ -84,24 +69,25 @@ function startAttendanceCheck(subjectid) {
 async function playSignal(subjectid, attendanceDuration, count) {
   if (attendanceDuration / 5 <= count) return;
 
-  // Auth code 생성 후 서버에 이를 전송
+  // Auth code 생성 후 현재 생성중인 코드를 화면에 표시하고, 서버에 이를 전송
   let currentAttendanceCode = generateAttendanceCode();
+  attendanceCodeDisplay.innerHTML = `${parseInt(currentAttendanceCode, 2)}`;
   const requestForm = {
     subjectId: subjectid,
     attendanceCode: parseInt(currentAttendanceCode, 2),
     startTime: Math.floor(Date.now() / 1000),
   };
-  const request = new Request("/prof/" + subjectid.toString(), {
-    method: "POST",
+  const request = new Request('/prof/' + subjectid.toString(), {
+    method: 'POST',
     headers: {
-      "Content-Type": "application/json",
+      'Content-Type': 'application/json',
     },
     body: JSON.stringify(requestForm),
   });
   const res = await fetch(request);
-  // 인증성공이면 서버에서 200 응답
+  // 인증 코드 잘 갔으면, 서버에서 200 응답
   if (res.status != 200) {
-    alert("오류 발생, 확인해주세요.");
+    alert('오류 발생, 확인해주세요.');
   }
 
   const ac = new (window.AudioContext || window.webkitAudioContext)();
