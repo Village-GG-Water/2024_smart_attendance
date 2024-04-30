@@ -1,13 +1,13 @@
 let buttonFlag = false;
 
 function changeButtonOn(btn) {
-  btn.innerHTML = '출석 인증 중';
-  btn.style.backgroundColor = '#4CAF50';
+  btn.innerHTML = "출석 인증 중";
+  btn.style.backgroundColor = "#4CAF50";
 }
 
 function changeButtonOff(btn) {
-  btn.innerHTML = '출석 시작';
-  btn.style.backgroundColor = '#00FFFF';
+  btn.innerHTML = "출석 시작";
+  btn.style.backgroundColor = "#00FFFF";
 }
 
 function submitData(subjectId) {
@@ -27,8 +27,8 @@ function buttonClickHandler() {
   }
 }
 
-var btn = document.getElementsByClassName('button_attendance')[0];
-btn.addEventListener('click', buttonClickHandler);
+var btn = document.getElementsByClassName("button_attendance")[0];
+btn.addEventListener("click", buttonClickHandler);
 
 // ---------------------------- 음파 검증 로직 ---------------------------- //
 const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
@@ -42,16 +42,16 @@ const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
 async function startAttendanceCheck(subjectid) {
   await audioCtx.resume();
 
-  const name = document.getElementById('student_name').value;
-  const studentNumber = document.getElementById('student_id').value;
+  const name = document.getElementById("student_name").value;
+  const studentNumber = document.getElementById("student_id").value;
 
-  if (name == '') {
-    alert('이름을 입력해주세요.');
+  if (name == "") {
+    alert("이름을 입력해주세요.");
     return;
   }
 
-  if (studentNumber == '') {
-    alert('학번을 입력해주세요.');
+  if (studentNumber == "") {
+    alert("학번을 입력해주세요.");
     return;
   }
 
@@ -78,13 +78,7 @@ async function startAttendanceCheck(subjectid) {
 
   //onstop
   mediaRecorder.onstop = () => {
-    const audioEl = document.querySelector('audio');
-    const blob = new Blob(audioArray, { type: 'audio/ogg codecs=opus' });
     audioArray.splice(0);
-
-    const blobURL = window.URL.createObjectURL(blob);
-
-    audioEl.src = blobURL;
 
     analyser.getByteFrequencyData(dataArray);
   };
@@ -96,6 +90,8 @@ async function startAttendanceCheck(subjectid) {
 
   while (true) {
     let count = 0;
+    let inputAttendanceCodeDict = {}; // <inputAttendanceCode, Count>
+    let recentAttendanceCodeStack = [];
     while (count < 250) {
       mediaRecorder.start();
       sleep(10);
@@ -108,23 +104,43 @@ async function startAttendanceCheck(subjectid) {
         analyser.fftSize
       );
 
-      attendanceCode = inputAttendanceCode; //TODO: input 오류 처리 과정 추가
+      dictAppend(inputAttendanceCodeDict, inputAttendanceCode);
+
+      if (
+        recentAttendanceCodeStack.length > 0 &&
+        recentAttendanceCodeStack[0] != inputAttendanceCode
+      ) {
+        recentAttendanceCodeStack = [];
+      }
+
+      recentAttendanceCodeStack.push(inputAttendanceCode);
+
+      if (recentAttendanceCodeStack.length >= 10) {
+        inputAttendanceCodeDict = {};
+        inputAttendanceCodeDict[inputAttendanceCode] =
+          recentAttendanceCodeStack.length;
+
+        count = recentAttendanceCodeStack.length - 1;
+        recentAttendanceCodeStack = [];
+      }
 
       audioArray = [];
-      count++; // (검증 필요, 박지환이 추가)
+      count++;
     }
 
-    // (Todo) 요기서 startTime 필드로 녹음 시작 시간 초단위 Unixtime으로 보내주시면 될 것 같습니다.
+    attendanceCode = parseInt(findMax(inputAttendanceCodeDict), 2);
+
     const requestForm = {
       studentName: name,
       studentId: studentNumber,
       attendanceCode: attendanceCode,
+      startTime: Math.floor(Date.now() / 1000),
     };
 
-    const request = new Request('/student/' + subjectid.toString(), {
-      method: 'POST',
+    const request = new Request("/student/" + subjectid.toString(), {
+      method: "POST",
       headers: {
-        'Content-Type': 'application/json',
+        "Content-Type": "application/json",
       },
       body: JSON.stringify(requestForm),
     });
@@ -137,7 +153,7 @@ async function startAttendanceCheck(subjectid) {
     }
   }
 
-  alert('출석이 완료되었습니다.');
+  alert("출석이 완료되었습니다.");
 }
 /**
  *
@@ -184,17 +200,17 @@ function frequencyToCode(
   threshold,
   fftsize
 ) {
-  let attendanceCode = '';
+  let attendanceCode = "";
 
   for (let i = 0; i < totalFrequencySet.length; i++) {
     const element = totalFrequencySet[i];
 
-    let index = Math.floor((fftsize * element) / 24000); //24000: default sample rate
+    let index = Math.floor(((fftsize >> 1) * element) / 24000); //24000: default sample rate
 
     if (inputFrequencySet[index] >= threshold) {
-      attendanceCode += '1';
+      attendanceCode += "1";
     } else {
-      attendanceCode += '0';
+      attendanceCode += "0";
     }
   }
 
@@ -204,4 +220,25 @@ function frequencyToCode(
 function sleep(ms) {
   const wakeUpTime = Date.now() + ms;
   while (Date.now() < wakeUpTime) {}
+}
+
+function dictAppend(dict, element) {
+  if (element in dict) {
+    dict[element]++;
+  } else {
+    dict[element] = 1;
+  }
+}
+
+function findMax(dict) {
+  let max = 0;
+  let maxElement = "";
+  for (var key in dict) {
+    if (dict[key] > max) {
+      max = dict[key];
+      maxElement = key;
+    }
+  }
+
+  return maxElement;
 }
