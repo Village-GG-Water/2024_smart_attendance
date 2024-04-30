@@ -3,21 +3,37 @@ let buttonFlag = false;
 function changeButtonOn(btn) {
   btn.innerHTML = '음파 생성 중';
   btn.style.backgroundColor = '#4CAF50';
+  buttonFlag = true;
   startAttendanceCheck(btn.id);
 }
 
 function changeButtonOff(btn) {
-  btn.innerHTML = '출석 시작';
+  btn.innerHTML = '출석 초기화 및 새로시작';
   btn.style.backgroundColor = '#00FFFF';
+  buttonFlag = false;
 }
 
-function buttonClickHandler() {
+async function resetAttendees(btn) {
+  const request = new Request('/attendees/' + btn.id.toString(), {
+    method: 'DELETE',
+  });
+  const res = await fetch(request);
+  // 리셋 잘 됐으면 200 응답
+  if (res.status != 200) {
+    alert('출석 정보 리셋 오류 발생, 확인해주세요.');
+    return false;
+  }
+  return true;
+}
+
+async function buttonClickHandler() {
+  console.log(buttonFlag);
   if (buttonFlag == false) {
+    const ret = await resetAttendees(this);
+    if (!ret) return;
     changeButtonOn(this);
-    buttonFlag = true;
   } else {
     changeButtonOff(this);
-    buttonFlag = false;
   }
 }
 
@@ -68,6 +84,10 @@ function startAttendanceCheck(subjectid) {
  */
 async function playSignal(subjectid, attendanceDuration, count) {
   if (attendanceDuration / 5 <= count) return;
+  if (buttonFlag == false) {
+    changeButtonOff(btn);
+    return;
+  }
 
   // Auth code 생성 후 현재 생성중인 코드를 화면에 표시하고, 서버에 이를 전송
   let currentAttendanceCode = generateAttendanceCode();
@@ -193,9 +213,3 @@ function codeToFrequency(code) {
 
   return frequencySet;
 }
-/*
-function sleep(ms) {
-  const wakeUpTime = Date.now() + ms;
-  while (Date.now() < wakeUpTime) {}
-}
-*/
