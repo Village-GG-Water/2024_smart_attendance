@@ -82,7 +82,8 @@ async function startAttendanceCheck(subjectid) {
   let attendanceCode = 0;
   let count = 0;
   let inputAttendanceCodeDict = {}; // <inputAttendanceCode, Count>
-  let recentAttendanceCodeStack = [];
+  let recentAttendanceCode = "";
+  let recentDiffrentCount = 0;
 
   //onstop
   mediaRecorder.onstop = () => {
@@ -99,30 +100,34 @@ async function startAttendanceCheck(subjectid) {
 
     dictAppend(inputAttendanceCodeDict, inputAttendanceCode);
 
+    //error correction
+
+    //현재 입력받은 code가 바로 이전에 입력받은 code와 같고 dictionary에서 가장 많이 입력받은 code와 다르면 recentDiffrentCount를 증가시키며 error correction을 준비
     if (
-      (recentAttendanceCodeStack.length > 0 &&
-        recentAttendanceCodeStack[0] != inputAttendanceCode) ||
-      findMax(inputAttendanceCodeDict) == inputAttendanceCode
+      recentAttendanceCode == inputAttendanceCode &&
+      findMax(inputAttendanceCodeDict) != inputAttendanceCode
     ) {
-      recentAttendanceCodeStack = [];
+      recentDiffrentCount++;
+    } else {
+      recentDiffrentCount = 0;
     }
 
-    recentAttendanceCodeStack.push(inputAttendanceCode);
+    recentAttendanceCode = inputAttendanceCode;
 
-    if (recentAttendanceCodeStack.length >= 10) {
+    //가장 최근에 받은 10개의 code가 똑같고 기존의 code와 다르면 기존에 입력받던 code가 만료되었다고 판단
+    if (recentDiffrentCount >= 10) {
       inputAttendanceCodeDict = {};
-      inputAttendanceCodeDict[inputAttendanceCode] =
-        recentAttendanceCodeStack.length;
+      inputAttendanceCodeDict[inputAttendanceCode] = recentDiffrentCount;
+      count = recentDiffrentCount - 1;
 
-      count = recentAttendanceCodeStack.length - 1;
-      recentAttendanceCodeStack = [];
+      recentDiffrentCount = 0;
     }
   };
 
   while (true) {
     count = 0;
     inputAttendanceCodeDict = {};
-    recentAttendanceCodeStack = [];
+    recentAttendanceCode = [];
     while (count < 250) {
       mediaRecorder.start();
       sleep(10);
