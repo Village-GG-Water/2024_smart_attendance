@@ -76,53 +76,57 @@ async function startAttendanceCheck(subjectid) {
 
   const dataArray = new Uint8Array(analyser.frequencyBinCount); //dataArray index = fftsize *frequency / samplerate
 
+  //Strat attendance check
+  let totalFrequencySet = generateFrequencySet();
+  const threshold = 20;
+  let attendanceCode = 0;
+  let count = 0;
+  let inputAttendanceCodeDict = {}; // <inputAttendanceCode, Count>
+  let recentAttendanceCodeStack = [];
+
   //onstop
   mediaRecorder.onstop = () => {
     audioArray.splice(0);
 
     analyser.getByteFrequencyData(dataArray);
+
+    let inputAttendanceCode = frequencyToCode(
+      dataArray,
+      totalFrequencySet,
+      threshold,
+      analyser.fftSize
+    );
+
+    dictAppend(inputAttendanceCodeDict, inputAttendanceCode);
+
+    if (
+      (recentAttendanceCodeStack.length > 0 &&
+        recentAttendanceCodeStack[0] != inputAttendanceCode) ||
+      findMax(inputAttendanceCodeDict) == inputAttendanceCode
+    ) {
+      recentAttendanceCodeStack = [];
+    }
+
+    recentAttendanceCodeStack.push(inputAttendanceCode);
+
+    if (recentAttendanceCodeStack.length >= 10) {
+      inputAttendanceCodeDict = {};
+      inputAttendanceCodeDict[inputAttendanceCode] =
+        recentAttendanceCodeStack.length;
+
+      count = recentAttendanceCodeStack.length - 1;
+      recentAttendanceCodeStack = [];
+    }
   };
 
-  //Strat attendance check
-  let totalFrequencySet = generateFrequencySet();
-  const threshold = 20;
-  let attendanceCode = 0;
-
   while (true) {
-    let count = 0;
-    let inputAttendanceCodeDict = {}; // <inputAttendanceCode, Count>
-    let recentAttendanceCodeStack = [];
+    count = 0;
+    inputAttendanceCodeDict = {};
+    recentAttendanceCodeStack = [];
     while (count < 250) {
       mediaRecorder.start();
       sleep(10);
       mediaRecorder.stop();
-
-      let inputAttendanceCode = frequencyToCode(
-        dataArray,
-        totalFrequencySet,
-        threshold,
-        analyser.fftSize
-      );
-
-      dictAppend(inputAttendanceCodeDict, inputAttendanceCode);
-
-      if (
-        recentAttendanceCodeStack.length > 0 &&
-        recentAttendanceCodeStack[0] != inputAttendanceCode
-      ) {
-        recentAttendanceCodeStack = [];
-      }
-
-      recentAttendanceCodeStack.push(inputAttendanceCode);
-
-      if (recentAttendanceCodeStack.length >= 10) {
-        inputAttendanceCodeDict = {};
-        inputAttendanceCodeDict[inputAttendanceCode] =
-          recentAttendanceCodeStack.length;
-
-        count = recentAttendanceCodeStack.length - 1;
-        recentAttendanceCodeStack = [];
-      }
 
       audioArray = [];
       count++;
