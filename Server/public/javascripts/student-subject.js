@@ -75,12 +75,9 @@ async function startAttendanceCheck(subjectid) {
   audioSource.connect(analyser);
 
   //Strat attendance check
-  let attendanceCode = 0;
 
   while (true) {
-    let inputAttendanceCodeDict = {}; // <inputAttendanceCode, Count>
-
-    await recording(
+    let attendanceCode = await recording(
       0,
       40,
       mediaRecorder,
@@ -88,9 +85,8 @@ async function startAttendanceCheck(subjectid) {
       new Uint8Array(analyser.frequencyBinCount),
       analyser,
       audioArray,
-      inputAttendanceCodeDict
+      {}
     );
-    attendanceCode = findMax(inputAttendanceCodeDict);
 
     const requestForm = {
       studentName: name,
@@ -142,7 +138,7 @@ function recording(
   return new Promise((resolve, reject) => {
     const iterate = (count, recentAttendanceCode, recentDiffrentCount) => {
       if (count >= 250) {
-        resolve();
+        resolve(findMax(inputAttendanceCodeDict));
         return;
       }
 
