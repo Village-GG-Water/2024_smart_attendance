@@ -1,13 +1,13 @@
 let buttonFlag = false;
 
 function changeButtonOn(btn) {
-  btn.innerHTML = "출석 인증 중";
-  btn.style.backgroundColor = "#4CAF50";
+  btn.innerHTML = '출석 인증 중';
+  btn.style.backgroundColor = '#4CAF50';
 }
 
 function changeButtonOff(btn) {
-  btn.innerHTML = "출석 시작";
-  btn.style.backgroundColor = "#00FFFF";
+  btn.innerHTML = '출석 시작';
+  btn.style.backgroundColor = '#00FFFF';
 }
 
 function submitData(subjectId) {
@@ -27,8 +27,8 @@ function buttonClickHandler() {
   }
 }
 
-var btn = document.getElementsByClassName("button_attendance")[0];
-btn.addEventListener("click", buttonClickHandler);
+var btn = document.getElementsByClassName('button_attendance')[0];
+btn.addEventListener('click', buttonClickHandler);
 
 // ---------------------------- 음파 검증 로직 ---------------------------- //
 const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
@@ -42,16 +42,16 @@ const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
 async function startAttendanceCheck(subjectid) {
   await audioCtx.resume();
 
-  const name = document.getElementById("student_name").value;
-  const studentNumber = document.getElementById("student_id").value;
+  const name = document.getElementById('student_name').value;
+  const studentNumber = document.getElementById('student_id').value;
 
-  if (name == "") {
-    alert("이름을 입력해주세요.");
+  if (name == '') {
+    alert('이름을 입력해주세요.');
     return;
   }
 
-  if (studentNumber == "") {
-    alert("학번을 입력해주세요.");
+  if (studentNumber == '') {
+    alert('학번을 입력해주세요.');
     return;
   }
 
@@ -82,7 +82,7 @@ async function startAttendanceCheck(subjectid) {
   let attendanceCode = 0;
   let count = 0;
   let inputAttendanceCodeDict = {}; // <inputAttendanceCode, Count>
-  let recentAttendanceCode = "";
+  let recentAttendanceCode = '';
   let recentDiffrentCount = 0;
 
   //onstop
@@ -125,6 +125,7 @@ async function startAttendanceCheck(subjectid) {
   };
 
   while (true) {
+    /*
     count = 0;
     inputAttendanceCodeDict = {};
     recentAttendanceCode = [];
@@ -146,10 +147,10 @@ async function startAttendanceCheck(subjectid) {
       startTime: Math.floor(Date.now() / 1000),
     };
 
-    const request = new Request("/student/" + subjectid.toString(), {
-      method: "POST",
+    const request = new Request('/student/' + subjectid.toString(), {
+      method: 'POST',
       headers: {
-        "Content-Type": "application/json",
+        'Content-Type': 'application/json',
       },
       body: JSON.stringify(requestForm),
     });
@@ -160,10 +161,54 @@ async function startAttendanceCheck(subjectid) {
     if (res.status == 200) {
       break;
     }
-  }
+    */
+    inputAttendanceCodeDict = {};
+    recentAttendanceCode = [];
+    await recording(0, mediaRecorder);
+    attendanceCode = parseInt(findMax(inputAttendanceCodeDict), 2);
 
-  alert("출석이 완료되었습니다.");
+    const requestForm = {
+      studentName: name,
+      studentId: studentNumber,
+      attendanceCode: attendanceCode,
+      startTime: Math.floor(Date.now() / 1000),
+    };
+
+    const request = new Request('/student/' + subjectid.toString(), {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(requestForm),
+    });
+
+    const res = await fetch(request);
+
+    // 인증성공이면 서버에서 200 응답
+    if (res.status == 200) {
+      alert('출석이 완료되었습니다.');
+      break;
+    }
+  }
 }
+
+function recording(count = 0, mediaRecorder) {
+  return new Promise((resolve, reject) => {
+    const iterate = (count) => {
+      if (count >= 250) {
+        resolve();
+        return;
+      }
+      mediaRecorder.start();
+      setTimeout(() => {
+        mediaRecorder.stop();
+        iterate(count + 1);
+      }, 10);
+    };
+    iterate(count);
+  });
+}
+
 /**
  *
  * @param {number} codeLength
@@ -210,7 +255,7 @@ function frequencyToCode(
   threshold,
   fftsize
 ) {
-  let attendanceCode = "";
+  let attendanceCode = '';
 
   for (let i = 0; i < totalFrequencySet.length; i++) {
     const element = totalFrequencySet[i];
@@ -218,9 +263,9 @@ function frequencyToCode(
     let index = Math.floor(((fftsize >> 1) * element) / 24000); //24000: default sample rate
 
     if (inputFrequencySet[index] >= threshold) {
-      attendanceCode += "1";
+      attendanceCode += '1';
     } else {
-      attendanceCode += "0";
+      attendanceCode += '0';
     }
   }
 
@@ -255,7 +300,7 @@ function dictAppend(dict, element) {
  */
 function findMax(dict) {
   let max = 0;
-  let maxElement = "";
+  let maxElement = '';
   for (var key in dict) {
     if (dict[key] > max) {
       max = dict[key];
