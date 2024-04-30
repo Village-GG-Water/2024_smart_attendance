@@ -7,6 +7,8 @@
 var app = require('../app');
 var debug = require('debug')('2024smart-attendance:server');
 var http = require('http');
+var https = require('https');
+var fs = require('fs');
 
 /**
  * Get port from environment and store in Express.
@@ -16,10 +18,24 @@ var port = normalizePort(process.env.PORT || '3000');
 app.set('port', port);
 
 /**
- * Create HTTP server.
+ * Read SSL Certifications
  */
 
-var server = http.createServer(app);
+const privateKey = fs.readFileSync('../../certs/private.key');
+const certificate = fs.readFileSync('../../certs/certificate.crt');
+const ca = fs.readFileSync('../../certs/ca_bundle.crt');
+
+const credentials = {
+  key: privateKey,
+  cert: certificate,
+  ca: ca,
+};
+
+/**
+ * Create HTTPS server.
+ */
+
+var server = https.createServer(credentials, app);
 
 /**
  * Listen on provided port, on all network interfaces.
