@@ -191,11 +191,12 @@ function generateFrequencySet(codeLength = 11) {
 }
 
 /**
+ * 입력받은 frequencySet을 totalFrequencySet을 기준으로 code로 변환하는 function
  *
- * @param {Array} inputFrequencySet
- * @param {Array} totalFrequencySet
- * @param {number} threshold
- * @param {number} fftsize
+ * @param {Array} inputFrequencySet 입력받은 frequencySet
+ * @param {Array} totalFrequencySet code의 자리수와 1:1 mapping되는 frequencySet
+ * @param {number} threshold 1로 인식되기 위한 최소 입력값
+ * @param {number} fftsize analyser에 있는 fftsize
  * @returns authCode
  */
 function frequencyToCode(
@@ -226,6 +227,13 @@ function sleep(ms) {
   while (Date.now() < wakeUpTime) {}
 }
 
+/**
+ * dictionary에 AttendanceCode를 추가하는 function
+ * 중복되는 code가 있을경우 count 증가
+ *
+ * @param {*} dict
+ * @param {String} element dictionary에 추가할 code
+ */
 function dictAppend(dict, element) {
   if (element in dict) {
     dict[element]++;
@@ -234,6 +242,12 @@ function dictAppend(dict, element) {
   }
 }
 
+/**
+ * dictionary에서 가장 많은 count가 있는 code를 찾는 function
+ *
+ * @param {*} dict
+ * @returns 가장 많은 count가 있는 code
+ */
 function findMax(dict) {
   let max = 0;
   let maxElement = "";
