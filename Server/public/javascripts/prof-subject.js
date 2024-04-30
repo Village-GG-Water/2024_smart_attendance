@@ -71,10 +71,18 @@ async function playSignal(subjectid, attendanceDuration, count) {
 
   // Auth code 생성 후 현재 생성중인 코드를 화면에 표시하고, 서버에 이를 전송
   let currentAttendanceCode = generateAttendanceCode();
-  attendanceCodeDisplay.innerHTML = `${parseInt(currentAttendanceCode, 2)}`;
+  const currentAttendanceCodeDecimal = parseInt(currentAttendanceCode, 2);
+  attendanceCodeDisplay.innerHTML =
+    currentAttendanceCodeDecimal < 1000
+      ? `0${currentAttendanceCodeDecimal}`
+      : currentAttendanceCodeDecimal < 100
+      ? `00${currentAttendanceCodeDecimal}`
+      : currentAttendanceCodeDecimal < 10
+      ? `000${currentAttendanceCodeDecimal}`
+      : `${currentAttendanceCodeDecimal}`;
   const requestForm = {
     subjectId: subjectid,
-    attendanceCode: parseInt(currentAttendanceCode, 2),
+    attendanceCode: currentAttendanceCodeDecimal,
     startTime: Math.floor(Date.now() / 1000),
   };
   const request = new Request('/prof/' + subjectid.toString(), {
