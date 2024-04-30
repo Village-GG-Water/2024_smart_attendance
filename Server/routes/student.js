@@ -43,6 +43,7 @@ router.post('/:subjectId', function (req, res, next) {
     return res.sendStatus(400);
 
   // 인증에 성공한 경우
+  result2[0].isAttended = true;
   res.sendStatus(200);
 });
 
