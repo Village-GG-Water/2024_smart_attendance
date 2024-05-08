@@ -251,19 +251,14 @@ function frequencyToCode(
   threshold,
   fftsize
 ) {
-  console.log(
-    'frequencyToCode : ',
-    inputFrequencySet,
-    totalFrequencySet,
-    threshold,
-    fftsize
-  );
+  console.log('frequencyToCode 함수 : ', inputFrequencySet);
   let attendanceCode = '';
 
   for (let i = 0; i < totalFrequencySet.length; i++) {
     const element = totalFrequencySet[i];
 
     let index = Math.floor(((fftsize >> 1) * element) / 24000); //24000: default sample rate
+    console.log('index : ', index);
 
     if (inputFrequencySet[index] >= threshold) {
       attendanceCode += '1';
