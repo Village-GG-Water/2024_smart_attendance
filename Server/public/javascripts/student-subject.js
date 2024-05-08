@@ -251,6 +251,13 @@ function frequencyToCode(
   threshold,
   fftsize
 ) {
+  console.log(
+    'frequencyToCode : ',
+    inputFrequencySet,
+    totalFrequencySet,
+    threshold,
+    fftsize
+  );
   let attendanceCode = '';
 
   for (let i = 0; i < totalFrequencySet.length; i++) {
