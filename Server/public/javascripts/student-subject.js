@@ -77,7 +77,8 @@ async function startAttendanceCheck(subjectid, name, studentNumber) {
         40,
         mediaRecorder,
         generateFrequencySet(),
-        new Uint8Array(analyser.frequencyBinCount),
+        //new Uint8Array(analyser.frequencyBinCount),
+        Float32Array(analyser.frequencyBinCount),
         analyser,
         audioArray,
         {}
