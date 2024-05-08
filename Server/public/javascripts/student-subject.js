@@ -265,7 +265,7 @@ function frequencyToCode(
 
     let index = Math.floor(((fftsize >> 1) * element) / 24000); //24000: default sample rate
 
-    if (inputFrequencySet[index] >= threshold) {
+    if (inputFrequencySet[index] >= 5) {
       attendanceCode += '1';
     } else {
       attendanceCode += '0';
