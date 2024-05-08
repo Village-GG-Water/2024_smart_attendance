@@ -77,8 +77,7 @@ async function startAttendanceCheck(subjectid, name, studentNumber) {
         40,
         mediaRecorder,
         generateFrequencySet(),
-        //new Uint8Array(analyser.frequencyBinCount),
-        Float32Array(analyser.frequencyBinCount),
+        new Uint8Array(analyser.frequencyBinCount),
         analyser,
         audioArray,
         {}
@@ -161,10 +160,8 @@ function recording(
         //code check
         audioArray.splice(0);
 
-        // analyser.getByteFrequencyData(dataArray);
-        analyser.getFloatFrequencyData(dataArray);
+        analyser.getByteFrequencyData(dataArray);
 
-        console.log(dataArray);
         let inputAttendanceCode = frequencyToCode(
           dataArray,
           totalFrequencySet,
