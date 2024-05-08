@@ -87,6 +87,7 @@ async function startAttendanceCheck(subjectid, name, studentNumber) {
       return;
     }
 
+    console.log('attendance code : ', attendanceCode);
     const requestForm = {
       studentName: name,
       studentId: studentNumber,
