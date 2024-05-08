@@ -74,7 +74,7 @@ async function startAttendanceCheck(subjectid, name, studentNumber) {
     try {
       attendanceCode = await recording(
         0,
-        10,
+        40,
         mediaRecorder,
         generateFrequencySet(),
         new Uint8Array(analyser.frequencyBinCount),
