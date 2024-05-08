@@ -91,7 +91,7 @@ async function playSignal(subjectid, attendanceDuration, count) {
 
   // Auth code 생성 후 현재 생성중인 코드를 화면에 표시하고, 서버에 이를 전송
   // let currentAttendanceCode = generateAttendanceCode();
-  let currentAttendanceCode = 1234;
+  let currentAttendanceCode = '10011010010';
   const currentAttendanceCodeDecimal = parseInt(currentAttendanceCode, 2);
   attendanceCodeDisplay.innerHTML =
     currentAttendanceCodeDecimal < 1000
