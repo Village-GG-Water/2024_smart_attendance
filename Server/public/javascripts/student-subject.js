@@ -141,6 +141,7 @@ function recording(
 ) {
   return new Promise((resolve, reject) => {
     const iterate = (count, recentAttendanceCode, recentDiffrentCount) => {
+      console.log('count : ', count);
       if (count >= 250) {
         resolve(findMax(inputAttendanceCodeDict));
         return;
