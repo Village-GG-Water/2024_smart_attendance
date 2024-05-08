@@ -257,7 +257,7 @@ function frequencyToCode(
   for (let i = 0; i < totalFrequencySet.length; i++) {
     const element = totalFrequencySet[i];
 
-    let index = Math.floor(((fftsize >> 1) * element) / 48000); //24000: default sample rate
+    let index = Math.floor(((fftsize >> 1) * element) / 24000); //24000: default sample rate
     console.log('index : ', index);
 
     if (inputFrequencySet[index] >= threshold) {
