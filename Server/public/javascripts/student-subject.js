@@ -164,6 +164,7 @@ function recording(
         // analyser.getByteFrequencyData(dataArray);
         analyser.getFloatFrequencyData(dataArray);
 
+        console.log(dataArray);
         let inputAttendanceCode = frequencyToCode(
           dataArray,
           totalFrequencySet,
