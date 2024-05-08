@@ -38,8 +38,6 @@ var btn = document.getElementsByClassName('button_attendance')[0];
 btn.addEventListener('click', buttonClickHandler);
 
 // ---------------------------- 음파 검증 로직 ---------------------------- //
-const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-
 /**
  * 출결 체크를 시작하는 function
  *
@@ -47,6 +45,7 @@ const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
  * @returns
  */
 async function startAttendanceCheck(subjectid, name, studentNumber) {
+  const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
   await audioCtx.resume();
 
   //MediaRecorder Setting
