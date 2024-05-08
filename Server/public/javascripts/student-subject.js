@@ -160,7 +160,8 @@ function recording(
         //code check
         audioArray.splice(0);
 
-        analyser.getByteFrequencyData(dataArray);
+        // analyser.getByteFrequencyData(dataArray);
+        analyser.getFloatFrequencyData(dataArray);
 
         let inputAttendanceCode = frequencyToCode(
           dataArray,
