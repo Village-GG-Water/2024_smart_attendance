@@ -72,16 +72,7 @@ async function startAttendanceCheck(subjectid, name, studentNumber) {
   while (true) {
     let attendanceCode;
     try {
-      attendanceCode = await recording(
-        0,
-        40,
-        mediaRecorder,
-        generateFrequencySet(),
-        new Uint8Array(analyser.frequencyBinCount),
-        analyser,
-        audioArray,
-        {}
-      );
+      attendanceCode = await recording(mediaRecorder, analyser, audioArray);
     } catch (e) {
       mediaRecorder.stop();
       return;
@@ -119,39 +110,28 @@ async function startAttendanceCheck(subjectid, name, studentNumber) {
 
 /**
  *
- * @param {number} count
- * @param {number} threshold
  * @param {MediaRecorder} mediaRecorder
- * @param {Array} totalFrequencySet
- * @param {Uint8Array} dataArray
  * @param {AnalyserNode} analyser
  * @param {Array} audioArray
- * @param {*} inputAttendanceCodeDict
  * @returns
  */
-function recording(
-  count = 0,
-  threshold,
-  mediaRecorder,
-  totalFrequencySet,
-  dataArray, //dataArray index = fftsize *frequency / samplerate
-  analyser,
-  audioArray,
-  inputAttendanceCodeDict
-) {
+function recording(mediaRecorder, analyser, audioArray) {
+  const threshold = 40,
+    totalFrequencySet = generateFrequencySet();
+
+  let dataArray = new Uint8Array(analyser.frequencyBinCount), //dataArray index = (fftsize/2) *frequency / samplerate
+    inputAttendanceCodeDict = {},
+    recentAttendanceCode = '',
+    recentDiffrentCount = 0;
+
   return new Promise((resolve, reject) => {
-    const iterate = (count, recentAttendanceCode, recentDiffrentCount) => {
-      console.log('count : ', count);
+    const iterate = (count) => {
       if (count >= 250) {
         resolve(findMax(inputAttendanceCodeDict));
         return;
       }
-      if (buttonFlag == false) {
-        reject();
-        return;
-      }
 
-      audioArray.length = 0; //audioArray clear
+      audioArray.length = 0;
       mediaRecorder.start();
 
       setTimeout(() => {
@@ -197,14 +177,12 @@ function recording(
             recentDiffrentCount = 0;
           }
         }
-
-        iterate(count + 1, recentAttendanceCode, recentDiffrentCount);
+        iterate(count + 1);
       }, 10);
     };
-    iterate(count, '', 0);
+    iterate(0);
   });
 }
-
 /**
  *
  * @param {number} codeLength
