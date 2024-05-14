@@ -126,8 +126,14 @@ function recording(mediaRecorder, analyser, audioArray) {
 
   return new Promise((resolve, reject) => {
     const iterate = (count) => {
+      console.log('count : ', count); // count 로깅
       if (count >= 250) {
         resolve(findMax(inputAttendanceCodeDict));
+        return;
+      }
+      if (buttonFlag == false) {
+        // 버튼 누르면 로직 종료
+        reject();
         return;
       }
 
