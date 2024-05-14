@@ -124,8 +124,6 @@ function recording(mediaRecorder, analyser, audioArray) {
     recentAttendanceCode = '',
     recentDiffrentCount = 0;
 
-  console.log('analyser.frequencyBinCount: ', analyser.frequencyBinCount);
-
   return new Promise((resolve, reject) => {
     const iterate = (count) => {
       console.log('count : ', count); // count 로깅
@@ -149,6 +147,7 @@ function recording(mediaRecorder, analyser, audioArray) {
         audioArray.splice(0);
 
         analyser.getByteFrequencyData(dataArray);
+        console.log(dataArray);
 
         let inputAttendanceCode = frequencyToCode(
           dataArray,
