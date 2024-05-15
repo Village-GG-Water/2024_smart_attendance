@@ -150,6 +150,8 @@ function recording(mediaRecorder, analyser, audioArray) {
         analyser.getByteFrequencyData(dataArray);
         console.log(dataArray);
 
+        console.log('fftsize: ', analyser.fftSize);
+
         let inputAttendanceCode = frequencyToCode(
           dataArray,
           totalFrequencySet,
