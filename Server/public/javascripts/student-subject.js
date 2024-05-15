@@ -151,6 +151,22 @@ function recording(mediaRecorder, analyser, audioArray) {
         console.log(dataArray);
 
         console.log('fftsize: ', analyser.fftSize);
+        console.log('channel count: ', analyser.channelCount);
+        console.log('analyser.channelCountMode: ', analyser.channelCountMode);
+        console.log(
+          'analyser.channelInterpretation: ',
+          analyser.channelInterpretation
+        );
+        console.log('analyser.context: ', analyser.context);
+        console.log('analyser.frequencyBinCount: ', analyser.frequencyBinCount);
+        console.log('analyser.maxDecibels: ', analyser.maxDecibels);
+        console.log('analyser.minDecibels: ', analyser.minDecibels);
+        console.log('analyser.numberOfInputs: ', analyser.numberOfInputs);
+        console.log('analyser.numberOfOutputs: ', analyser.numberOfOutputs);
+        console.log(
+          'analyser.smoothingTimeConstant: ',
+          analyser.smoothingTimeConstant
+        );
 
         let inputAttendanceCode = frequencyToCode(
           dataArray,
