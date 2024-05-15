@@ -45,7 +45,7 @@ btn.addEventListener('click', buttonClickHandler);
  * @returns
  */
 async function startAttendanceCheck(subjectid, name, studentNumber) {
-  const audioCtx = (window.AudioContext || window.webkitAudioContext)();
+  const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
   await audioCtx.resume();
   console.log('sample Rate : ', audioCtx.sampleRate);
 
