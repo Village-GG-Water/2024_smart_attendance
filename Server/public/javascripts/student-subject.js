@@ -49,9 +49,28 @@ async function startAttendanceCheck(subjectid, name, studentNumber) {
   await audioCtx.resume();
 
   //MediaRecorder Setting
-  const mediaStream = await navigator.mediaDevices.getUserMedia({
-    audio: true,
-  });
+  const mediaStream = await navigator.mediaDevices
+    .getUserMedia({
+      audio: true,
+    })
+    .then(function (stream) {
+      // 오디오 소스로 사용하기 위해 MediaStreamAudioSourceNode 생성
+      const source = audioContext.createMediaStreamSource(stream);
+
+      // BiquadFilterNode 생성
+      const highPassFilter = audioContext.createBiquadFilter();
+      highPassFilter.type = 'highpass'; // 필터 유형을 highpass로 설정
+      highPassFilter.frequency.setValueAtTime(5000, audioContext.currentTime); // 컷오프 주파수를 5000Hz로 설정
+
+      // 오디오 체인 연결 (마이크 입력 -> 고역 통과 필터 -> AudioContext의 출력 또는 다른 노드)
+      source.connect(highPassFilter);
+      highPassFilter.connect(audioContext.destination); // 실제 사용 시, 이 부분을 다른 노드에 연결할 수도 있음
+
+      // 필요한 추가 처리...
+    })
+    .catch(function (err) {
+      console.log('오디오 입력을 얻는 데 실패했습니다.', err);
+    });
   const mediaRecorder = new MediaRecorder(mediaStream);
 
   let audioArray = [];
