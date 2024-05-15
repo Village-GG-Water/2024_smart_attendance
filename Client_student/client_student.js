@@ -1,5 +1,3 @@
-const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-
 /**
  * 출결 체크를 시작하는 function
  *
@@ -7,20 +5,8 @@ const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
  * @returns
  */
 async function startAttendanceCheck(subjectid) {
+  const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
   await audioCtx.resume();
-
-  const name = document.getElementById("name").value;
-  const studentNumber = document.getElementById("studentNumber").value;
-
-  if (name == "") {
-    alert("이름을 입력해주세요.");
-    return;
-  }
-
-  if (studentNumber == "") {
-    alert("학번을 입력해주세요.");
-    return;
-  }
 
   //MediaRecorder Setting
   const mediaStream = await navigator.mediaDevices.getUserMedia({
@@ -41,63 +27,117 @@ async function startAttendanceCheck(subjectid) {
 
   audioSource.connect(analyser);
 
-  const dataArray = new Uint8Array(analyser.frequencyBinCount); //dataArray index = fftsize *frequency / samplerate
-
-  //onstop
-  mediaRecorder.onstop = () => {
-    const audioEl = document.querySelector("audio");
-    const blob = new Blob(audioArray, { type: "audio/ogg codecs=opus" });
-    audioArray.splice(0);
-
-    const blobURL = window.URL.createObjectURL(blob);
-
-    audioEl.src = blobURL;
-
-    analyser.getByteFrequencyData(dataArray);
-  };
-
   //Strat attendance check
-  let totalFrequencySet = generateFrequencySet();
-  const threshold = 20;
   let attendanceCode = 0;
 
   while (true) {
-    let count = 0;
-    while (count < 250) {
-      mediaRecorder.start();
-      sleep(10);
-      mediaRecorder.stop();
+    attendanceCode = await recording(mediaRecorder, analyser, audioArray);
+    //attendanceCode = findMax(inputAttendanceCodeDict);
 
-      let inputAttendanceCode = frequencyToCode(
-        dataArray,
-        totalFrequencySet,
-        threshold,
-        analyser.fftSize
-      );
-
-      attendanceCode = inputAttendanceCode; //TODO: input 오류 처리 과정 추가
-
-      audioArray = [];
-    }
-
-    const requestForm = {
-      studentname: name,
-      studentId: studentNumber,
-      attendanceCode: attendanceCode,
-    };
-
-    const request = new Request("/student/" + subjectid.toString(), {
-      method: "POST",
-      body: JSON.stringify(requestForm),
-    });
-
-    if (attendanceSuccess) {
-      break;
-    }
+    break;
   }
 
-  alert("출석이 완료되었습니다.");
+  // * debug
+  console.log('end');
+  console.log('attendanceCode: ', attendanceCode);
 }
+
+/**
+ *
+ * @param {MediaRecorder} mediaRecorder
+ * @param {AnalyserNode} analyser
+ * @param {Array} audioArray
+ * @returns
+ */
+function recording(mediaRecorder, analyser, audioArray) {
+  const totalFrequencySet = generateFrequencySet();
+  const minThreshold = 20;
+
+  let dataArray = new Uint8Array(analyser.frequencyBinCount), //dataArray index = fftsize *frequency / samplerate
+    inputAttendanceCodeDict = {},
+    recentAttendanceCode = '',
+    threshold = minThreshold,
+    recentDiffrentCount = 0;
+
+  return new Promise((resolve, reject) => {
+    const iterate = (count) => {
+      if (count >= 250) {
+        resolve(findMax(inputAttendanceCodeDict));
+        return;
+      }
+
+      audioArray.length = 0;
+      mediaRecorder.start();
+
+      setTimeout(() => {
+        mediaRecorder.stop();
+
+        //code check
+        audioArray.splice(0);
+
+        analyser.getByteFrequencyData(dataArray);
+
+        //threshold setting
+        let noiseLevel = 0;
+        for (let index = 0; index < dataArray.length; index++) {
+          noiseLevel += dataArray[index];
+        }
+        noiseLevel = Math.floor(noiseLevel / dataArray.length);
+
+        threshold = noiseLevel + minThreshold;
+
+        let inputAttendanceCode = frequencyToCode(
+          dataArray,
+          totalFrequencySet,
+          threshold,
+          analyser.fftSize
+        );
+
+        if (inputAttendanceCode == 0) {
+          count--;
+        } else {
+          dictAppend(inputAttendanceCodeDict, inputAttendanceCode);
+
+          //error correction
+
+          //현재 입력받은 code가 바로 이전에 입력받은 code와 같고 dictionary에서 가장 많이 입력받은 code와 다르면 recentDiffrentCount를 증가시키며 error correction을 준비
+          if (
+            recentAttendanceCode == inputAttendanceCode &&
+            findMax(inputAttendanceCodeDict) != inputAttendanceCode
+          ) {
+            recentDiffrentCount++;
+          } else {
+            recentDiffrentCount = 0;
+          }
+
+          recentAttendanceCode = inputAttendanceCode;
+
+          //가장 최근에 받은 10개의 code가 똑같고 기존의 code와 다르면 기존에 입력받던 code가 만료되었다고 판단
+          if (recentDiffrentCount >= 10) {
+            inputAttendanceCodeDict = {};
+            inputAttendanceCodeDict[inputAttendanceCode] = recentDiffrentCount;
+            count = recentDiffrentCount - 1;
+
+            recentDiffrentCount = 0;
+          }
+        }
+
+        // *debug
+        console.log('count: ', count);
+        console.log('dataArray: ', dataArray);
+        console.log('inputAttendanceCode: ', inputAttendanceCode);
+        console.log('recentAttendanceCode: ', recentAttendanceCode);
+        console.log('recentDiffrentCount: ', recentDiffrentCount);
+        console.log('inputAttendanceCodeDict: ', inputAttendanceCodeDict);
+        console.log('threshold: ', threshold);
+
+        iterate(count + 1);
+      }, 10);
+    };
+    iterate(0);
+  });
+}
+
 /**
  *
  * @param {number} codeLength
@@ -143,19 +183,24 @@ function frequencyToCode(
   threshold,
   fftsize
 ) {
-  let attendanceCode = "";
+  let attendanceCode = '';
 
   for (let i = 0; i < totalFrequencySet.length; i++) {
     const element = totalFrequencySet[i];
 
-    let index = Math.floor((fftsize * element) / 24000); //24000: default sample rate
+    let index = Math.floor((fftsize * element) / 48000); // 48000: default sample rate
 
     if (inputFrequencySet[index] >= threshold) {
-      attendanceCode += "1";
+      attendanceCode += '1';
     } else {
-      attendanceCode += "0";
+      attendanceCode += '0';
     }
   }
+
+  attendanceCode = parseInt(attendanceCode, 2);
+
+  console.log(inputFrequencySet);
+  console.log(attendanceCode);
 
   return attendanceCode;
 }
@@ -163,4 +208,25 @@ function frequencyToCode(
 function sleep(ms) {
   const wakeUpTime = Date.now() + ms;
   while (Date.now() < wakeUpTime) {}
+}
+
+function dictAppend(dict, element) {
+  if (element in dict) {
+    dict[element]++;
+  } else {
+    dict[element] = 1;
+  }
+}
+
+function findMax(dict) {
+  let max = 0;
+  let maxElement = '';
+  for (var key in dict) {
+    if (dict[key] > max) {
+      max = dict[key];
+      maxElement = key;
+    }
+  }
+
+  return maxElement;
 }
