@@ -116,7 +116,7 @@ async function startAttendanceCheck(subjectid, name, studentNumber) {
  * @returns
  */
 function recording(mediaRecorder, analyser, audioArray) {
-  const threshold = 40,
+  const minThreshold = 20,
     totalFrequencySet = generateFrequencySet();
 
   let dataArray = new Uint8Array(analyser.frequencyBinCount), //dataArray index = (fftsize/2) *frequency / samplerate
@@ -148,6 +148,17 @@ function recording(mediaRecorder, analyser, audioArray) {
 
         analyser.getByteFrequencyData(dataArray);
         console.log(dataArray);
+
+        //threshold setting
+        let noiseLevel = 0;
+        for (let index = 0; index < dataArray.length; index++) {
+          const element = dataArray[index];
+
+          noiseLevel += element;
+        }
+        noiseLevel = Math.floor(noiseLevel / dataArray.length);
+
+        let threshold = noiseLevel + minThreshold;
 
         let inputAttendanceCode = frequencyToCode(
           dataArray,
