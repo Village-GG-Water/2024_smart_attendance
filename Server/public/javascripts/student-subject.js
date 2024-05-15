@@ -45,8 +45,9 @@ btn.addEventListener('click', buttonClickHandler);
  * @returns
  */
 async function startAttendanceCheck(subjectid, name, studentNumber) {
-  const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  const audioCtx = (window.AudioContext || window.webkitAudioContext)();
   await audioCtx.resume();
+  console.log('sample Rate : ', audioCtx.sampleRate);
 
   //MediaRecorder Setting
   const mediaStream = await navigator.mediaDevices.getUserMedia({
@@ -253,11 +254,6 @@ function frequencyToCode(
   }
 
   return parseInt(attendanceCode, 2);
-}
-
-function sleep(ms) {
-  const wakeUpTime = Date.now() + ms;
-  while (Date.now() < wakeUpTime) {}
 }
 
 /**
