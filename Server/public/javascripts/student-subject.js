@@ -47,7 +47,6 @@ btn.addEventListener('click', buttonClickHandler);
 async function startAttendanceCheck(subjectid, name, studentNumber) {
   const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
   await audioCtx.resume();
-  console.log('sample Rate : ', audioCtx.sampleRate);
 
   //MediaRecorder Setting
   const mediaStream = await navigator.mediaDevices.getUserMedia({
@@ -149,24 +148,6 @@ function recording(mediaRecorder, analyser, audioArray) {
 
         analyser.getByteFrequencyData(dataArray);
         console.log(dataArray);
-
-        console.log('fftsize: ', analyser.fftSize);
-        console.log('channel count: ', analyser.channelCount);
-        console.log('analyser.channelCountMode: ', analyser.channelCountMode);
-        console.log(
-          'analyser.channelInterpretation: ',
-          analyser.channelInterpretation
-        );
-        console.log('analyser.context: ', analyser.context);
-        console.log('analyser.frequencyBinCount: ', analyser.frequencyBinCount);
-        console.log('analyser.maxDecibels: ', analyser.maxDecibels);
-        console.log('analyser.minDecibels: ', analyser.minDecibels);
-        console.log('analyser.numberOfInputs: ', analyser.numberOfInputs);
-        console.log('analyser.numberOfOutputs: ', analyser.numberOfOutputs);
-        console.log(
-          'analyser.smoothingTimeConstant: ',
-          analyser.smoothingTimeConstant
-        );
 
         let inputAttendanceCode = frequencyToCode(
           dataArray,
