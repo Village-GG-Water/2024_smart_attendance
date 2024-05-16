@@ -27,6 +27,7 @@ function buttonClickHandler() {
       return;
     }
     changeButtonOn(this);
+    userStartAudio();
     startAttendanceCheck(btn.id, name, studentNumber);
     // 여기서 서버 검증 결과에 따라 출석 실패/성공 띄우기
   } else {
@@ -41,21 +42,15 @@ btn.addEventListener('click', buttonClickHandler);
 let fft;
 let mic;
 function setup() {
+  getAudioContext().suspend();
   noCanvas(); // 시각화를 위한 캔버스 생성은 필요 없음
-  mic = new p5.AudioIn(); // 마이크 입력 생성
+  mic = new p5.AudioIn(function () {
+    console.log('mic 활성화!!');
+  }); // 마이크 입력 생성
   mic.start(); // 마이크 사용 시작
-  fft = new p5.FFT();
+  fft = new p5.FFT(0.8, 1024);
   fft.setInput(mic); // FFT가 마이크 입력을 분석하도록 설정
 }
-
-function getEnergyEvery10ms() {
-  const energyArray = fft.analyze(); // 전체 주파수 범위의 에너지 분석
-  console.log(energyArray); // 콘솔에 에너지 배열 출력
-
-  setTimeout(getEnergyEvery10ms, 10); // 10ms 후에 다시 측정
-}
-// p5.js의 자동 실행을 막기 위해 setup 함수를 수동으로 호출
-window.setup = setup;
 
 /**
  * 출결 체크를 시작하는 function
@@ -64,14 +59,11 @@ window.setup = setup;
  * @returns
  */
 async function startAttendanceCheck(subjectid, name, studentNumber) {
-  let audioArray = [];
-
-  //Strat attendance check
-
+  // window.setup = setup;
   while (true) {
     let attendanceCode;
     try {
-      attendanceCode = await recording(mediaRecorder, analyser, audioArray);
+      attendanceCode = await recording();
     } catch (e) {
       return;
     }
@@ -108,17 +100,13 @@ async function startAttendanceCheck(subjectid, name, studentNumber) {
 
 /**
  *
- * @param {MediaRecorder} mediaRecorder
- * @param {AnalyserNode} analyser
- * @param {Array} audioArray
  * @returns
  */
-function recording(mediaRecorder, analyser, audioArray) {
+function recording() {
   const threshold = 40,
     totalFrequencySet = generateFrequencySet();
 
-  let dataArray, //dataArray index = (fftsize/2) *frequency / samplerate
-    inputAttendanceCodeDict = {},
+  let inputAttendanceCodeDict = {},
     recentAttendanceCode = '',
     recentDiffrentCount = 0;
 
@@ -135,8 +123,6 @@ function recording(mediaRecorder, analyser, audioArray) {
         return;
       }
 
-      audioArray.length = 0;
-
       setTimeout(() => {
         const dataArray = fft.analyze();
         console.log(dataArray);
@@ -145,7 +131,7 @@ function recording(mediaRecorder, analyser, audioArray) {
           dataArray,
           totalFrequencySet,
           threshold,
-          analyser.fftSize
+          2048
         );
 
         if (inputAttendanceCode == 0) {
