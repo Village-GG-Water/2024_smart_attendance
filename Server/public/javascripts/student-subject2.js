@@ -44,11 +44,9 @@ let mic;
 function setup() {
   getAudioContext().suspend();
   noCanvas(); // 시각화를 위한 캔버스 생성은 필요 없음
-  mic = new p5.AudioIn(function () {
-    console.log('mic 활성화!!');
-  }); // 마이크 입력 생성
+  mic = new p5.AudioIn(); // 마이크 입력 생성
   mic.start(); // 마이크 사용 시작
-  fft = new p5.FFT(0.8, 1024);
+  fft = new p5.FFT();
   fft.setInput(mic); // FFT가 마이크 입력을 분석하도록 설정
 }
 
