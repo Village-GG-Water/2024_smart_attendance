@@ -103,7 +103,7 @@ async function playSignal(subjectid, attendanceDuration, count) {
       : `${currentAttendanceCodeDecimal}`;
   const requestForm = {
     subjectId: subjectid,
-    attendanceCode: currentAttendanceCodeDecimal,
+    attendanceCode: currentAttendanceCodeDecimal + 1,
     startTime: Math.floor(Date.now() / 1000),
   };
   const request = new Request('/prof/' + subjectid.toString(), {
