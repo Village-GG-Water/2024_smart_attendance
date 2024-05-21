@@ -101,7 +101,7 @@ async function startAttendanceCheck(subjectid, name, studentNumber) {
  * @returns
  */
 function recording() {
-  const threshold = 40,
+  const minThreshold = 20,
     totalFrequencySet = generateFrequencySet();
 
   let inputAttendanceCodeDict = {},
@@ -124,6 +124,17 @@ function recording() {
       setTimeout(() => {
         const dataArray = fft.analyze();
         console.log(dataArray);
+
+        //threshold setting
+        let noiseLevel = 0;
+        for (let index = 0; index < 1024; index++) {
+          const element = dataArray[index];
+
+          noiseLevel += element;
+        }
+        noiseLevel = Math.floor(noiseLevel / 1024);
+
+        let threshold = noiseLevel + minThreshold;
 
         let inputAttendanceCode = frequencyToCode(
           dataArray,
