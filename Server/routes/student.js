@@ -50,23 +50,43 @@ router.post('/:subjectId', function (req, res, next) {
   // 인증에 성공한 경우 -> csv 저장 후, 응답
   result2[0].isAttended = true; // 출석으로 변경
   csvData = [{ studentId, startTime, endTime }]; // csv에 저장할 데이터
-  const csvFilePath = 'output.csv';
+  const csvFilePath = `${subjectId}.csv`;
   const ws = fs.createWriteStream(csvFilePath, { flags: 'a' });
-  fastcsv
-    .write(csvData, {
-      headers: true,
-    })
-    .pipe(ws)
-    .on('finish', () => {
-      console.log(`${csvFilePath} - CSV 파일 저장 완료`);
-      ws.close();
-      res.sendStatus(200);
-    })
-    .on('error', (err) => {
-      console.error(`${csvFilePath} - CSV 파일 저장 중 오류 발생: `, err);
-      ws.close();
-      res.sendStatus(200); // 인증은 성공했으니 200 응답
-    });
+  const lines = fs.readFileSync(csvFilePath, 'UTF-8').split('\n');
+  if (lines.length === 3)
+    fastcsv
+      .write(csvData, {
+        headers: true,
+        includeEndRowDelimiter: true,
+      })
+      .pipe(ws)
+      .on('finish', () => {
+        console.log(`${csvFilePath} - CSV 파일 저장 완료`);
+        ws.close();
+        res.sendStatus(200);
+      })
+      .on('error', (err) => {
+        console.error(`${csvFilePath} - CSV 파일 저장 중 오류 발생: `, err);
+        ws.close();
+        res.sendStatus(200); // 인증은 성공했으니 200 응답
+      });
+  else
+    fastcsv
+      .write(csvData, {
+        headers: false,
+        includeEndRowDelimiter: true,
+      })
+      .pipe(ws)
+      .on('finish', () => {
+        console.log(`${csvFilePath} - CSV 파일 저장 완료`);
+        ws.close();
+        res.sendStatus(200);
+      })
+      .on('error', (err) => {
+        console.error(`${csvFilePath} - CSV 파일 저장 중 오류 발생: `, err);
+        ws.close();
+        res.sendStatus(200); // 인증은 성공했으니 200 응답
+      });
 });
 
 module.exports = router;
