@@ -25,6 +25,7 @@ router.post('/:subjectId', function (req, res, next) {
   const subjectId = Number(req.params.subjectId);
   const attendanceCode = req.body.attendanceCode;
   const startTime = req.body.startTime;
+  console.log(subjectId, attendanceCode, startTime);
   result = data.filter((x) => x.subjectId == subjectId);
   if (result.length != 1) {
     console.log('500 : ', result);
