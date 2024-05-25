@@ -47,12 +47,12 @@ router.post('/:subjectId', function (req, res, next) {
 
   // 인증에 성공한 경우 -> csv 저장 후, 응답
   result2[0].isAttended = true; // 출석으로 변경
-  data = [{ subjectName, studentId, startTime, endTime }]; // csv에 저장할 데이터
+  csvData = [{ subjectName, studentId, startTime, endTime }]; // csv에 저장할 데이터
   const csvFilePath = 'output.csv';
   const csvExists = fs.existsSync(csvFilePath);
   const ws = fs.createWriteStream(csvFilePath, { flags: 'a' });
   fastcsv
-    .write(data, { headers: !csvExists })
+    .write(csvData, { headers: !csvExists })
     .pipe(ws)
     .on('finish', () => {
       console.log(`${csvFilePath} - CSV 파일 저장 완료`);
