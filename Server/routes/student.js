@@ -37,6 +37,7 @@ router.post('/:subjectId', function (req, res, next) {
   let result2 = result1[0].students.filter((x) => x.id == studentId);
   if (result2.length != 1 || result2[0].name != studentName)
     return res.sendStatus(400);
+  console.log('result2 : ', result2);
 
   // #2. 출석코드 검증
   // 애초에 출석 코드 데이터가 없는 경우
