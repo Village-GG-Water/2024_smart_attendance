@@ -19,7 +19,7 @@ router.get('/:subjectId', function (req, res, next) {
   });
 });
 
-router.post('/:subjectId', function (req, res, next) {
+router.post('/:subjectId', async function (req, res, next) {
   const subjectId = Number(req.params.subjectId);
   const startTime = Number(req.body.startTime);
   const endTime = Number(req.body.endTime);
@@ -51,7 +51,7 @@ router.post('/:subjectId', function (req, res, next) {
   console.log('csvData : ', csvData);
   const csvFilePath = 'output.csv';
   console.log('hi1');
-  const ws = fs.createWriteStream(csvFilePath, { flags: 'a' });
+  const ws = await fs.createWriteStream(csvFilePath, { flags: 'a' });
   console.log('hi3');
   fastcsv
     .write(csvData, {
