@@ -54,7 +54,9 @@ router.post('/:subjectId', function (req, res, next) {
   const ws = fs.createWriteStream(csvFilePath, { flags: 'a' });
   console.log('hi3');
   fastcsv
-    .write(csvData, { headers: false })
+    .write(csvData, {
+      headers: ['studentName', 'studentId', 'startTime', 'endTime'],
+    })
     .pipe(ws)
     .on('finish', () => {
       console.log(`${csvFilePath} - CSV 파일 저장 완료`);
