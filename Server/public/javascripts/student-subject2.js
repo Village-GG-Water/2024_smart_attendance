@@ -74,7 +74,7 @@ async function startAttendanceCheck(subjectid, name, studentNumber) {
       studentName: name,
       studentId: studentNumber,
       attendanceCode: attendanceCode,
-      startTime: Date.now(),
+      startTime,
       endTime: Date.now(),
     };
 
