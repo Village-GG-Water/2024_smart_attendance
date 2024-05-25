@@ -25,9 +25,7 @@ router.post('/:subjectId', function (req, res, next) {
   const subjectId = Number(req.params.subjectId);
   const attendanceCode = req.body.attendanceCode;
   const startTime = req.body.startTime;
-  console.log('data : ', data);
   result = data.filter((x) => x.subjectId == subjectId);
-  console.log('result : ', result);
   if (result.length != 1) return res.sendStatus(500);
   result[0].attendanceCode[attendanceCode] = startTime;
   // console.log()
@@ -40,12 +38,12 @@ router.post('/startAttendance/:subjectId', function (req, res, next) {
   const subjectId = Number(req.params.subjectId);
   const startTime = req.body.startTime;
   // csv 파일 생성 및 저장
-  data = [{ subjectId, startTime }];
+  csvData = [{ subjectId, startTime }];
   const csvFilePath = 'output.csv';
   const csvExists = fs.existsSync(csvFilePath);
   const ws = fs.createWriteStream(csvFilePath, { flags: 'w' });
   fastcsv
-    .write(data, { headers: !csvExists })
+    .write(csvData, { headers: !csvExists })
     .pipe(ws)
     .on('finish', () => {
       console.log(`${csvFilePath} - CSV 파일 저장 완료`);
