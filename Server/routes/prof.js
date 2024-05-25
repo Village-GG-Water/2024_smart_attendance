@@ -46,6 +46,7 @@ router.post('/startAttendance/:subjectId', function (req, res, next) {
     .pipe(ws)
     .on('finish', () => {
       console.log(`${csvFilePath} - CSV 파일 저장 완료`);
+      ws.close();
       res.sendStatus(200);
     })
     .on('error', (err) => {

@@ -60,10 +60,12 @@ router.post('/:subjectId', function (req, res, next) {
     .pipe(ws)
     .on('finish', () => {
       console.log(`${csvFilePath} - CSV 파일 저장 완료`);
+      ws.close();
       res.sendStatus(200);
     })
     .on('error', (err) => {
       console.error(`${csvFilePath} - CSV 파일 저장 중 오류 발생: `, err);
+      ws.close();
       res.sendStatus(200); // 인증은 성공했으니 200 응답
     });
 });
