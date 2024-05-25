@@ -40,10 +40,9 @@ router.post('/startAttendance/:subjectId', function (req, res, next) {
   // csv 파일 생성 및 저장
   csvData = [{ subjectId, startTime }];
   const csvFilePath = 'output.csv';
-  const csvExists = fs.existsSync(csvFilePath);
   const ws = fs.createWriteStream(csvFilePath, { flags: 'w' });
   fastcsv
-    .write(csvData, { headers: !csvExists })
+    .write(csvData, { headers: true })
     .pipe(ws)
     .on('finish', () => {
       console.log(`${csvFilePath} - CSV 파일 저장 완료`);

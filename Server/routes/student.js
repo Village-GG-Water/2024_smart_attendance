@@ -51,12 +51,10 @@ router.post('/:subjectId', function (req, res, next) {
   console.log('csvData : ', csvData);
   const csvFilePath = 'output.csv';
   console.log('hi1');
-  const csvExists = fs.existsSync(csvFilePath);
-  console.log('csvExists : ', csvExists);
   const ws = fs.createWriteStream(csvFilePath, { flags: 'a' });
   console.log('hi3');
   fastcsv
-    .write(csvData, { headers: !csvExists })
+    .write(csvData, { headers: false })
     .pipe(ws)
     .on('finish', () => {
       console.log(`${csvFilePath} - CSV 파일 저장 완료`);
