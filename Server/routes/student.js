@@ -49,6 +49,7 @@ router.post('/:subjectId', function (req, res, next) {
   result2[0].isAttended = true; // 출석으로 변경
   csvData = [{ studentName, studentId, startTime, endTime }]; // csv에 저장할 데이터
   console.log('csvData : ', csvData);
+  console.log('data : ', data);
   const csvFilePath = 'output.csv';
   const csvExists = fs.existsSync(csvFilePath);
   const ws = fs.createWriteStream(csvFilePath, { flags: 'a' });
