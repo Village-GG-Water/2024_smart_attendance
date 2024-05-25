@@ -9,7 +9,7 @@ async function changeButtonOn(btn) {
     subjectId: btn.id,
     startTime: Date.now(),
   };
-  const request = new Request('/startAttendance/' + btn.id.toString(), {
+  const request = new Request('/prof/startAttendance/' + btn.id.toString(), {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
