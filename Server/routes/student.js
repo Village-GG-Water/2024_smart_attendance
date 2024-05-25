@@ -52,7 +52,7 @@ router.post('/:subjectId', function (req, res, next) {
   const csvFilePath = 'output.csv';
   console.log('hi1');
   const csvExists = fs.existsSync(csvFilePath);
-  console.log(csvExists);
+  console.log('csvExists : ', csvExists);
   const ws = fs.createWriteStream(csvFilePath, { flags: 'a' });
   console.log('hi3');
   fastcsv
