@@ -25,13 +25,10 @@ router.post('/:subjectId', function (req, res, next) {
   const subjectId = Number(req.params.subjectId);
   const attendanceCode = req.body.attendanceCode;
   const startTime = req.body.startTime;
-  console.log(data);
+  console.log('data : ', data);
   result = data.filter((x) => x.subjectId == subjectId);
-  console.log(result);
-  if (result.length != 1) {
-    console.log('500 : ', result);
-    return res.sendStatus(500);
-  }
+  console.log('result : ', result);
+  if (result.length != 1) return res.sendStatus(500);
   result[0].attendanceCode[attendanceCode] = startTime;
   // console.log()
   console.log('(교수) 출석 코드 수신: 과목ID, startTime, 출석코드');
