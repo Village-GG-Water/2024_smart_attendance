@@ -1,5 +1,7 @@
 let buttonFlag = false;
 let isDoneAttendanceCheck = false;
+let startTime = 0;
+let endTime = 0;
 
 function changeButtonOn(btn) {
   buttonFlag = true;
@@ -27,6 +29,7 @@ function buttonClickHandler() {
       return;
     }
     changeButtonOn(this);
+    startTime = Date.now();
     userStartAudio();
     startAttendanceCheck(btn.id, name, studentNumber);
     // 여기서 서버 검증 결과에 따라 출석 실패/성공 띄우기
@@ -71,7 +74,8 @@ async function startAttendanceCheck(subjectid, name, studentNumber) {
       studentName: name,
       studentId: studentNumber,
       attendanceCode: attendanceCode,
-      startTime: Math.floor(Date.now() / 1000),
+      startTime: Date.now(),
+      endTime: Date.now(),
     };
 
     const request = new Request('/student/' + subjectid.toString(), {
@@ -110,7 +114,6 @@ function recording() {
 
   return new Promise((resolve, reject) => {
     const iterate = (count) => {
-      console.log('count : ', count); // count 로깅
       if (count >= 250) {
         resolve(findMax(inputAttendanceCodeDict));
         return;
@@ -123,7 +126,6 @@ function recording() {
 
       setTimeout(() => {
         const dataArray = fft.analyze();
-        console.log(dataArray);
 
         //threshold setting
         let noiseLevel = 0;
@@ -225,12 +227,10 @@ function frequencyToCode(
 ) {
   let attendanceCode = '';
 
-  console.log('로깅 : ');
   for (let i = 0; i < totalFrequencySet.length; i++) {
     const element = totalFrequencySet[i];
 
     let index = Math.floor((fftsize * element) / 48000); //48000: default sample rate
-    console.log('index값, arr[index] : ', index, inputFrequencySet[index]);
 
     if (inputFrequencySet[index] >= threshold) {
       attendanceCode += '1';

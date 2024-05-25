@@ -1,9 +1,26 @@
 let buttonFlag = false;
 
-function changeButtonOn(btn) {
+async function changeButtonOn(btn) {
   btn.innerHTML = '음파 생성 중';
   btn.style.backgroundColor = '#4CAF50';
   buttonFlag = true;
+  // 서버 csv 기록 위한 요청
+  const requestForm = {
+    subjectId: btn.id,
+    startTime: Date.now(),
+  };
+  const request = new Request('/startAttendance/' + btn.id.toString(), {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(requestForm),
+  });
+  const res = await fetch(request);
+  // 잘 갔으면, 서버에서 200 응답
+  if (res.status != 200) {
+    alert('오류 발생, 확인해주세요.');
+  }
   startAttendanceCheck(btn.id);
 }
 
@@ -31,7 +48,7 @@ async function buttonClickHandler() {
   if (buttonFlag == false) {
     const ret = await resetAttendees(this);
     if (!ret) return;
-    changeButtonOn(this);
+    await changeButtonOn(this);
   } else {
     changeButtonOff(this);
   }
@@ -104,7 +121,7 @@ async function playSignal(subjectid, attendanceDuration, count) {
   const requestForm = {
     subjectId: subjectid,
     attendanceCode: currentAttendanceCodeDecimal,
-    startTime: Math.floor(Date.now() / 1000),
+    startTime: Math.floor(Date.now()),
   };
   const request = new Request('/prof/' + subjectid.toString(), {
     method: 'POST',

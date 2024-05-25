@@ -1,6 +1,8 @@
 var express = require('express');
 var router = express.Router();
 var data = require('../data/data');
+const fs = require('fs');
+const fastcsv = require('fast-csv');
 
 router.get('/subject-list', function (req, res, next) {
   res.render('prof-subject-list', {
@@ -30,6 +32,27 @@ router.post('/:subjectId', function (req, res, next) {
   console.log('(교수) 출석 코드 수신: 과목ID, startTime, 출석코드');
   console.log(subjectId, startTime, attendanceCode);
   res.sendStatus(200);
+});
+
+router.post('/startAttendance/:subjectId', function (req, res, next) {
+  const subjectId = Number(req.params.subjectId);
+  const startTime = req.body.startTime;
+  // csv 파일 생성 및 저장
+  data = [{ subjectId, startTime }];
+  const csvFilePath = 'output.csv';
+  const csvExists = fs.existsSync(csvFilePath);
+  const ws = fs.createWriteStream(csvFilePath, { flags: 'w' });
+  fastcsv
+    .write(data, { headers: !csvExists })
+    .pipe(ws)
+    .on('finish', () => {
+      console.log(`${csvFilePath} - CSV 파일 저장 완료`);
+      res.sendStatus(200);
+    })
+    .on('error', (err) => {
+      console.error(`${csvFilePath} - CSV 파일 저장 중 오류 발생: `, err);
+      res.sendStatus(500);
+    });
 });
 
 module.exports = router;

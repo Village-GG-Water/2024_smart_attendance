@@ -22,14 +22,17 @@ router.get('/:subjectId', function (req, res, next) {
 router.post('/:subjectId', function (req, res, next) {
   const subjectId = Number(req.params.subjectId);
   const startTime = Number(req.body.startTime);
+  const endTime = Number(req.body.endTime);
   const studentName = req.body.studentName;
   const studentId = req.body.studentId;
   const attendanceCode = req.body.attendanceCode;
   let result1 = data.filter((x) => x.subjectId == subjectId);
   if (result1.length != 1) return res.sendStatus(500);
   // console.log()
-  console.log('(학생) 출석 코드 수신: 이름, 학번, startTime, 출석코드: ');
-  console.log(studentName, studentId, startTime, attendanceCode);
+  console.log(
+    '(학생) 출석 코드 수신: 이름, 학번, startTime, endTime, 출석코드: '
+  );
+  console.log(studentName, studentId, startTime, endTime, attendanceCode);
   // #1. 유효한 학생인지 검증
   let result2 = result1[0].students.filter((x) => x.id == studentId);
   if (result2.length != 1 || result2[0].name != studentName)
@@ -39,12 +42,26 @@ router.post('/:subjectId', function (req, res, next) {
   // 애초에 출석 코드 데이터가 없는 경우
   if (!result1[0].attendanceCode[attendanceCode]) return res.sendStatus(400);
   // 인증 기간이 만료된 출석 코드인 경우
-  if (Math.abs(result1[0].attendanceCode[attendanceCode] - startTime) > 5)
+  if (Math.abs(result1[0].attendanceCode[attendanceCode] - startTime) > 5000)
     return res.sendStatus(400);
 
-  // 인증에 성공한 경우
-  result2[0].isAttended = true;
-  res.sendStatus(200);
+  // 인증에 성공한 경우 -> csv 저장 후, 응답
+  result2[0].isAttended = true; // 출석으로 변경
+  data = [{ subjectName, studentId, startTime, endTime }]; // csv에 저장할 데이터
+  const csvFilePath = 'output.csv';
+  const csvExists = fs.existsSync(csvFilePath);
+  const ws = fs.createWriteStream(csvFilePath, { flags: 'a' });
+  fastcsv
+    .write(data, { headers: !csvExists })
+    .pipe(ws)
+    .on('finish', () => {
+      console.log(`${csvFilePath} - CSV 파일 저장 완료`);
+      res.sendStatus(200);
+    })
+    .on('error', (err) => {
+      console.error(`${csvFilePath} - CSV 파일 저장 중 오류 발생: `, err);
+      res.sendStatus(200); // 인증은 성공했으니 200 응답
+    });
 });
 
 module.exports = router;
