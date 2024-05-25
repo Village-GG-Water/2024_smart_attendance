@@ -34,13 +34,13 @@ router.post('/:subjectId', function (req, res, next) {
   res.sendStatus(200);
 });
 
-router.post('/startAttendance/:subjectId', async function (req, res, next) {
+router.post('/startAttendance/:subjectId', function (req, res, next) {
   const subjectId = Number(req.params.subjectId);
   const startTime = req.body.startTime;
   // csv 파일 생성 및 저장
   csvData = [{ subjectId, startTime }];
   const csvFilePath = 'output.csv';
-  const ws = await fs.createWriteStream(csvFilePath, { flags: 'w' });
+  const ws = fs.createWriteStream(csvFilePath, { flags: 'w' });
   fastcsv
     .write(csvData, { headers: true })
     .pipe(ws)

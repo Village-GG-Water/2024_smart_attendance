@@ -21,7 +21,7 @@ router.get('/:subjectId', function (req, res, next) {
   });
 });
 
-router.post('/:subjectId', async function (req, res, next) {
+router.post('/:subjectId', function (req, res, next) {
   const subjectId = Number(req.params.subjectId);
   const startTime = Number(req.body.startTime);
   const endTime = Number(req.body.endTime);
@@ -49,15 +49,12 @@ router.post('/:subjectId', async function (req, res, next) {
 
   // 인증에 성공한 경우 -> csv 저장 후, 응답
   result2[0].isAttended = true; // 출석으로 변경
-  csvData = [{ studentName, studentId, startTime, endTime }]; // csv에 저장할 데이터
-  console.log('csvData : ', csvData);
+  csvData = [{ studentId, startTime, endTime }]; // csv에 저장할 데이터
   const csvFilePath = 'output.csv';
-  console.log('hi1');
-  const ws = await fs.createWriteStream(csvFilePath, { flags: 'a' });
-  console.log('hi3');
+  const ws = fs.createWriteStream(csvFilePath, { flags: 'a' });
   fastcsv
     .write(csvData, {
-      headers: ['studentName', 'studentId', 'startTime', 'endTime'],
+      headers: true,
     })
     .pipe(ws)
     .on('finish', () => {
