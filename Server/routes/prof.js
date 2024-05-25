@@ -42,7 +42,7 @@ router.post('/startAttendance/:subjectId', async function (req, res, next) {
   const csvFilePath = 'output.csv';
   const ws = await fs.createWriteStream(csvFilePath, { flags: 'w' });
   fastcsv
-    .write(csvData, { headers: false })
+    .write(csvData, { headers: true })
     .pipe(ws)
     .on('finish', () => {
       console.log(`${csvFilePath} - CSV 파일 저장 완료`);
