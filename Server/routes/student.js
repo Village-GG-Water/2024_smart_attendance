@@ -35,10 +35,12 @@ router.post('/:subjectId', function (req, res, next) {
     '(학생) 출석 코드 수신: 이름, 학번, startTime, endTime, 출석코드: '
   );
   console.log(studentName, studentId, startTime, endTime, attendanceCode);
-  // #1. 유효한 학생인지 검증
+  // #1. 유효한 학생인지 검증 => X! 그냥 있으면 데이터 바꿔주고 없으면 추가!
   let result2 = result1[0].students.filter((x) => x.id == studentId);
-  if (result2.length != 1 || result2[0].name != studentName)
-    return res.sendStatus(400);
+  if (result2.length != 1) {
+    result2 = [{ name: studentName, id: studentId, isAttended: false }];
+    result1[0].students.push(result2[0]);
+  }
 
   // #2. 출석코드 검증
   // 애초에 출석 코드 데이터가 없는 경우
