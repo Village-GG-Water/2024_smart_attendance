@@ -52,7 +52,30 @@ router.post('/:subjectId', function (req, res, next) {
   // 인증에 성공한 경우 -> csv 저장 후, 응답
   result2[0].isAttended = true; // 출석으로 변경
   csvData = [{ studentName, studentId, startTime, endTime }]; // csv에 저장할 데이터
-  const csvFilePath = `${subjectId}.csv`;
+  let csvFilePath;
+  fs.readdir('.', (err, files) => {
+    if (err) {
+      console.error('디렉토리를 읽는 중 오류가 발생했습니다:', err);
+      return;
+    }
+    const matchingFiles = files.filter((file) => {
+      return file.startsWith(`${subjectId}_`) && file.endsWith('.csv');
+    });
+    let maxNumber = -1;
+    matchingFiles.forEach((file) => {
+      const baseName = path.basename(file, '.csv');
+      const numberPart = baseName.split('_')[1];
+      const number = Number(numberPart);
+      if (!isNaN(number) && number > maxNumber) {
+        maxNumber = number;
+      }
+    });
+    if (maxNumber !== -1) {
+      csvFilePath = `${subjectId}_${maxNumber}.csv`;
+    } else {
+      console.log('학생 출석 정보를 저장해야하지만 일치하는 파일이 없습니다.');
+    }
+  });
   const ws = fs.createWriteStream(csvFilePath, { flags: 'a' });
   const lines = fs.readFileSync(csvFilePath, 'UTF-8').split('\n');
   if (lines.length === 3)

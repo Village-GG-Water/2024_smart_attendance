@@ -39,7 +39,7 @@ router.post('/startAttendance/:subjectId', function (req, res, next) {
   const startTime = req.body.startTime;
   // csv 파일 생성 및 저장
   csvData = [{ subjectId, startTime }];
-  const csvFilePath = `${subjectId}.csv`;
+  const csvFilePath = `${subjectId}_${startTime}.csv`;
   const ws = fs.createWriteStream(csvFilePath, { flags: 'w' });
   fastcsv
     .write(csvData, { headers: true, includeEndRowDelimiter: true })
