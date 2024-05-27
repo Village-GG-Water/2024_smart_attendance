@@ -2,6 +2,8 @@ var express = require('express');
 var router = express.Router();
 var data = require('../data/data');
 const fs = require('fs');
+const fsPromise = require('fs/promises');
+const path = require('path');
 const fastcsv = require('fast-csv');
 
 router.get('/subject-list', function (req, res, next) {
@@ -21,7 +23,7 @@ router.get('/:subjectId', function (req, res, next) {
   });
 });
 
-router.post('/:subjectId', function (req, res, next) {
+router.post('/:subjectId', async function (req, res, next) {
   const subjectId = Number(req.params.subjectId);
   const startTime = Number(req.body.startTime);
   const endTime = Number(req.body.endTime);
@@ -53,29 +55,31 @@ router.post('/:subjectId', function (req, res, next) {
   result2[0].isAttended = true; // 출석으로 변경
   csvData = [{ studentName, studentId, startTime, endTime }]; // csv에 저장할 데이터
   let csvFilePath;
-  fs.readdir('.', (err, files) => {
-    if (err) {
-      console.error('디렉토리를 읽는 중 오류가 발생했습니다:', err);
-      return;
-    }
-    const matchingFiles = files.filter((file) => {
-      return file.startsWith(`${subjectId}_`) && file.endsWith('.csv');
-    });
-    let maxNumber = -1;
-    matchingFiles.forEach((file) => {
-      const baseName = path.basename(file, '.csv');
-      const numberPart = baseName.split('_')[1];
-      const number = Number(numberPart);
-      if (!isNaN(number) && number > maxNumber) {
-        maxNumber = number;
-      }
-    });
-    if (maxNumber !== -1) {
-      csvFilePath = `${subjectId}_${maxNumber}.csv`;
-    } else {
-      console.log('학생 출석 정보를 저장해야하지만 일치하는 파일이 없습니다.');
+  let files;
+  try {
+    files = await fsPromise.readdir('.');
+  } catch (e) {
+    console.error('디렉토리를 읽는 중 오류가 발생했습니다:', err);
+    return res.sendStatus(500);
+  }
+  const matchingFiles = files.filter((file) => {
+    return file.startsWith(`${subjectId}_`) && file.endsWith('.csv');
+  });
+  let maxNumber = -1;
+  matchingFiles.forEach((file) => {
+    const baseName = path.basename(file, '.csv');
+    const numberPart = baseName.split('_')[1];
+    const number = Number(numberPart);
+    if (!isNaN(number) && number > maxNumber) {
+      maxNumber = number;
     }
   });
+  if (maxNumber !== -1) {
+    csvFilePath = `${subjectId}_${maxNumber}.csv`;
+    console.log(csvFilePath);
+  } else {
+    console.log('학생 출석 정보를 저장해야하지만 일치하는 파일이 없습니다.');
+  }
   const ws = fs.createWriteStream(csvFilePath, { flags: 'a' });
   const lines = fs.readFileSync(csvFilePath, 'UTF-8').split('\n');
   if (lines.length === 3)
