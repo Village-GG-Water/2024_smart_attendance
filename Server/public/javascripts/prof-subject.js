@@ -68,13 +68,17 @@ document.addEventListener('DOMContentLoaded', function () {
       .then((response) => response.json())
       .then((data) => {
         const attendeeList = document.getElementById('attendee_list');
+        const attendeeCount = document.getElementById('attendee_count');
         attendeeList.innerHTML = '';
+        let count = 0; // 출석자 수 초기화
 
         data.forEach((attendee) => {
           const subDiv = document.createElement('div');
           subDiv.textContent = `이름: ${attendee.name}, ID: ${attendee.id}`;
           attendeeList.appendChild(subDiv);
+          count++;
         });
+        attendeeCount.textContent = `출석자 수: ${count}`;
       })
       .catch((error) => console.error('Error:', error));
   };
