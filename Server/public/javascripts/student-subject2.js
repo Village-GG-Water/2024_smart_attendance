@@ -20,6 +20,7 @@ function buttonClickHandler() {
   if (buttonFlag == false) {
     const name = document.getElementById('student_name').value;
     const studentNumber = document.getElementById('student_id').value;
+    const seat = document.getElementById('seat').value;
     if (name == '') {
       alert('이름을 입력해주세요.');
       return;
@@ -28,10 +29,14 @@ function buttonClickHandler() {
       alert('학번을 입력해주세요.');
       return;
     }
+    if (seat == '') {
+      alert('좌석을 입력해주세요.');
+      return;
+    }
     changeButtonOn(this);
     startTime = Date.now();
     userStartAudio();
-    startAttendanceCheck(btn.id, name, studentNumber);
+    startAttendanceCheck(btn.id, name, studentNumber, seat);
     // 여기서 서버 검증 결과에 따라 출석 실패/성공 띄우기
   } else {
     changeButtonOff(this);
@@ -59,7 +64,7 @@ function setup() {
  * @param {number} subjectid  과목 코드
  * @returns
  */
-async function startAttendanceCheck(subjectid, name, studentNumber) {
+async function startAttendanceCheck(subjectid, name, studentNumber, seat) {
   // window.setup = setup;
   while (true) {
     let attendanceCode;
@@ -76,6 +81,7 @@ async function startAttendanceCheck(subjectid, name, studentNumber) {
       attendanceCode: attendanceCode,
       startTime,
       endTime: Date.now(),
+      seat,
     };
 
     const request = new Request('/student/' + subjectid.toString(), {

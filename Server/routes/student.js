@@ -30,6 +30,7 @@ router.post('/:subjectId', async function (req, res, next) {
   const studentName = req.body.studentName;
   const studentId = req.body.studentId;
   const attendanceCode = req.body.attendanceCode;
+  const seat = req.body.seat;
   let result1 = data.filter((x) => x.subjectId == subjectId);
   if (result1.length != 1) return res.sendStatus(500);
   // console.log()
@@ -53,7 +54,7 @@ router.post('/:subjectId', async function (req, res, next) {
 
   // 인증에 성공한 경우 -> csv 저장 후, 응답
   result2[0].isAttended = true; // 출석으로 변경
-  csvData = [{ studentName, studentId, startTime, endTime }]; // csv에 저장할 데이터
+  csvData = [{ studentName, studentId, startTime, endTime, seat }]; // csv에 저장할 데이터
   let csvFilePath;
   let files;
   try {
