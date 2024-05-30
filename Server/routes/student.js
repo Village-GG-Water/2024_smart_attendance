@@ -49,7 +49,7 @@ router.post('/:subjectId', async function (req, res, next) {
   // 애초에 출석 코드 데이터가 없는 경우
   if (!result1[0].attendanceCode[attendanceCode]) return res.sendStatus(401);
   // 인증 기간이 만료된 출석 코드인 경우
-  if (Math.abs(result1[0].attendanceCode[attendanceCode] - Date.now()) > 5000)
+  if (Math.abs(result1[0].attendanceCode[attendanceCode] - endTime) > 5000)
     return res.sendStatus(402);
 
   // 인증에 성공한 경우 -> csv 저장 후, 응답
