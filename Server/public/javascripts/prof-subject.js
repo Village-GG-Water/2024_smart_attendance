@@ -104,7 +104,9 @@ function startAttendanceCheck(subjectid) {
  * @param {String} attendanceCode 음파신호로 출력해야 하는 출결 인증 코드
  */
 async function playSignal(subjectid, attendanceDuration, count) {
-  if (attendanceDuration / 5 <= count) return;
+  const sessionTime = 1;
+
+  if (attendanceDuration / sessionTime <= count) return;
   if (buttonFlag == false) {
     changeButtonOff(btn);
     return;
@@ -177,7 +179,7 @@ async function playSignal(subjectid, attendanceDuration, count) {
   setTimeout(() => {
     osc.stop();
     playSignal(subjectid, attendanceDuration, count + 1);
-  }, 5000);
+  }, sessionTime * 1000);
 }
 
 /**

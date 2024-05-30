@@ -120,7 +120,7 @@ function recording() {
 
   return new Promise((resolve, reject) => {
     const iterate = (count) => {
-      if (count >= 250) {
+      if (count >= 50) {
         resolve(findMax(inputAttendanceCodeDict));
         return;
       }
