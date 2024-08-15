@@ -7,15 +7,15 @@ html
     .page_title #{title}
     form#attendance_form(action="#" method="post")
       .form-group
-        label(for="student_name") 이름:  
+        label(for="student_name") Name:  
         input#student_name(type="text" name="name" required)
       .form-group
-        label(for="student_id") 학번:  
+        label(for="student_id") Student ID:  
         input#student_id(type="number" name="student_id" required)
       .form-group
-        label(for="seat") 좌석:  
+        label(for="seat") Seat:  
         input#seat(type="text" name="seat" required)
-    div(id=subject_id class="button_attendance") 출석 시작
+    div(id=subject_id class="button_attendance") Start
     script(src="/javascripts/p5.js")
     script(src="/javascripts/p5.sound.js")
     script(src="/javascripts/student-subject2.js")
