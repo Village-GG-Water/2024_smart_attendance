@@ -78,7 +78,7 @@ document.addEventListener('DOMContentLoaded', function () {
           attendeeList.appendChild(subDiv);
           count++;
         });
-        attendeeCount.textContent = `출석자 수: ${count}`;
+        attendeeCount.textContent = `Number of Attendees: ${count}`;
       })
       .catch((error) => console.error('Error:', error));
   };
