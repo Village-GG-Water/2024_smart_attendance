@@ -8,6 +8,8 @@ var indexRouter = require('./routes/index');
 var profRouter = require('./routes/prof');
 var studentRouter = require('./routes/student');
 var attendancesRouter = require('./routes/attendees');
+var bluetoothRouter = require('./routes/bluetooth');
+var gpsRouter = require('./routes/gps');
 
 var app = express();
 
@@ -25,6 +27,8 @@ app.use('/', indexRouter);
 app.use('/prof', profRouter);
 app.use('/student', studentRouter);
 app.use('/attendees', attendancesRouter);
+app.use('/bluetooth', bluetoothRouter);
+app.use('/gps', gpsRouter);
 
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {
