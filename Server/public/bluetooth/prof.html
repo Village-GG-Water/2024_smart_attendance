@@ -68,6 +68,10 @@
     </div>
 
     <script>
+        if (!navigator.bluetooth) {
+            alert('Your browser does not support Bluetooth API.');
+        }
+
         document.getElementById('start-attendance').addEventListener('click', async () => {
             const button = document.getElementById('start-attendance');
 
@@ -95,14 +99,15 @@
 
             // Original Bluetooth functionality
             try {
-                const server = await navigator.bluetooth.requestDevice({
-                    acceptAllDevices: true,
-                    optionalServices: ['custom_service']
+                // Request Bluetooth device with user consent
+                const device = await navigator.bluetooth.requestDevice({
+                    acceptAllDevices: true, // All Bluetooth devices
+                    optionalServices: ['custom_service'] // You can specify UUIDs if needed
                 });
 
-                const gattServer = await server.gatt.connect();
-                const service = await gattServer.getPrimaryService('custom_service');
-                const characteristic = await service.getCharacteristic('custom_characteristic');
+                const gattServer = await device.gatt.connect();
+                const service = await gattServer.getPrimaryService('custom_service'); // Replace with correct UUID
+                const characteristic = await service.getCharacteristic('custom_characteristic'); // Replace with correct UUID
 
                 characteristic.startNotifications();
                 characteristic.addEventListener('characteristicvaluechanged', async event => {
@@ -115,7 +120,7 @@
                             headers: {
                                 'Content-Type': 'application/json'
                             },
-                            body: JSON.stringify(receivedData)
+                            body: JSON.stringify({ data: receivedData }) // Send received data to server
                         });
 
                         if (response.ok) {

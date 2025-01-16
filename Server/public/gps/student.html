@@ -110,6 +110,9 @@
 
           if (response.ok) {
             messageEl.textContent = '데이터가 성공적으로 전송되었습니다!';
+          } else if (response.status == 400) {
+            messageEl.textContent = '인증에 실패하였습니다.';
+            messageEl.classList.add('error');
           } else {
             messageEl.textContent = '서버에서 오류가 발생했습니다.';
             messageEl.classList.add('error');

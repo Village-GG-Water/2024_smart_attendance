@@ -117,7 +117,7 @@ router.post('/student', async function (req, res, next) {
       });
 });
 
-function calculateDistance(pLatitude, pLongitude, sLatitude, sLongitude, mRange) {
+function calculateDistance(pLatitude, pLongitude, sLatitude, sLongitude) {
   const toRadians = (degrees) => degrees * (Math.PI / 180);
 
   const earthRadius = 6371000; // 지구 반지름 (미터 단위)
