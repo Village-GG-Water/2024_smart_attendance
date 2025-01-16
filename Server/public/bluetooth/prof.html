@@ -39,21 +39,25 @@
             button.disabled = true;
             button.textContent = 'Attendance in progress...';
 
+            const serviceUuid = '12345678-1234-5678-1234-567812345678';
+            const dataUuid = '87654321-4321-8765-4321-876543210000';
             try {
                 // 요청 블루투스 권한
-                const bluetoothDevice = await navigator.bluetooth.requestDevice({ acceptAllDevices: true });
+                const bluetoothDevice = await navigator.bluetooth.requestDevice({
+                    acceptAllDevices: true,
+                    optioptionalServices: [serviceUuid],
+                });
                 console.log('Bluetooth device selected:', bluetoothDevice);
 
                 // 서버에 출석 시작 알림
                 await fetch('/bluetooth/startAttendance', { method: 'POST' });
-
                 // 블루투스 연결 대기
                 bluetoothDevice.gatt.connect().then(server => {
                     console.log('Waiting for student data...');
 
                     // 예: studentDataCharacteristic 읽기 시뮬레이션
-                    server.getPrimaryService('07883d1e-0a7e-427b-a908-dcd1adf599a2')
-                        .then(service => service.getCharacteristic('ed60b794-efd8-4d29-8730-4b69a8238bca'))
+                    server.getPrimaryService(serviceUuid)
+                        .then(service => service.getCharacteristic(dataUuid))
                         .then(characteristic => characteristic.startNotifications())
                         .then(characteristic => {
                             characteristic.addEventListener('characteristicvaluechanged', async (event) => {

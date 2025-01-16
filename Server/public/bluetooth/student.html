@@ -47,15 +47,20 @@
             button.disabled = true;
             button.textContent = 'Connecting...';
 
+            const serviceUuid = '12345678-1234-5678-1234-567812345678';
+            const dataUuid = '87654321-4321-8765-4321-876543210000';
             try {
                 // 요청 블루투스 권한
-                const bluetoothDevice = await navigator.bluetooth.requestDevice({ acceptAllDevices: true });
+                const bluetoothDevice = await navigator.bluetooth.requestDevice({
+                    acceptAllDevices: true,
+                    optionalServices: [serviceUuid],
+                });
                 console.log('Connecting to:', bluetoothDevice);
 
                 // 블루투스 연결 후 데이터 전송
                 const server = await bluetoothDevice.gatt.connect();
-                const service = await server.getPrimaryService('07883d1e-0a7e-427b-a908-dcd1adf599a2');
-                const characteristic = await service.getCharacteristic('ed60b794-efd8-4d29-8730-4b69a8238bca');
+                const service = await server.getPrimaryService(serviceUuid);
+                const characteristic = await service.getCharacteristic(dataUuid);
 
                 // JSON 데이터 생성 및 전송
                 const data = new TextEncoder().encode(JSON.stringify({ name, studentId }));
