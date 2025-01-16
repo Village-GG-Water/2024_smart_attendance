@@ -12,7 +12,7 @@ router.post('/startAttendance', function (req, res, next) {
   const startTime = Math.floor(Date.now() / 1000);
   const csvFilePath = `bluetooth_${startTime}.csv`;  // 파일 이름 형식 "bluetooth_${startTime}.csv"
   const ws = fs.createWriteStream(csvFilePath, { flags: 'w' });
-  csvData = [{ type: "bluetooth", startTime, pLatitude, pLongitude, mRange }];
+  csvData = [{ type: "bluetooth", startTime }];
   fastcsv
     .write(csvData, { headers: true, includeEndRowDelimiter: true })
     .pipe(ws)
