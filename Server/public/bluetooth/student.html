@@ -64,7 +64,9 @@
 
                 // JSON 데이터 생성 및 전송
                 const data = new TextEncoder().encode(JSON.stringify({ name, studentId }));
+                console.log("hi~");
                 await characteristic.writeValue(data);
+                console.log("bye~");
 
                 console.log('Data sent to professor:', { name, studentId });
                 button.textContent = 'Attendance finished';
