@@ -3,161 +3,85 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bluetooth (교수)</title>
+    <title>Professor Attendance</title>
     <style>
         body {
             font-family: Arial, sans-serif;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            height: 100vh;
-            margin: 0;
-            background-color: #f0f0f0;
+            text-align: center;
+            margin: 50px;
         }
-
         button {
             padding: 10px 20px;
-            background-color: #28A745;
-            color: white;
-            border: none;
-            border-radius: 4px;
             font-size: 16px;
             cursor: pointer;
-            transition: background-color 0.3s ease;
         }
-
-        button:hover:not([disabled]) {
-            background-color: #218838;
-        }
-
-        button[disabled] {
-            background-color: #6c757d;
+        button:disabled {
+            background-color: gray;
             cursor: not-allowed;
         }
-
-        #student-list {
-            margin-top: 20px;
-            width: 80%;
-            max-width: 500px;
-            background-color: white;
-            border-radius: 8px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            padding: 10px;
-        }
-
-        #student-list ul {
-            list-style: none;
+        ul {
+            list-style-type: none;
             padding: 0;
         }
-
-        #student-list li {
-            padding: 10px;
-            border-bottom: 1px solid #ddd;
-        }
-
-        #student-list li:last-child {
-            border-bottom: none;
+        li {
+            margin: 10px 0;
         }
     </style>
 </head>
 <body>
-    <button id="start-attendance">Start Attendance</button>
-    <div id="student-list">
-        <ul></ul>
-    </div>
+    <h1>Professor Attendance Page</h1>
+    <button id="startAttendance">Start Attendance</button>
+    <ul id="studentList"></ul>
 
     <script>
-        if (!navigator.bluetooth) {
-            alert('Your browser does not support Bluetooth API.');
-        }
-
-        document.getElementById('start-attendance').addEventListener('click', async () => {
-            const button = document.getElementById('start-attendance');
-
-            // POST request to "/bluetooth/startAttendance"
-            try {
-                const startResponse = await fetch('/bluetooth/startAttendance', {
-                    method: 'POST',
-                });
-
-                if (startResponse.ok) {
-                    console.log('Attendance process started.');
-                } else {
-                    throw new Error('Failed to send attendance start request.');
-                }
-            } catch (error) {
-                console.error('Error starting attendance:', error);
-                alert('Failed to start attendance.');
-                return;
-            }
-
-            // Change button state
-            button.textContent = "Attendance in progress...";
+        document.getElementById('startAttendance').addEventListener('click', async function () {
+            const button = this;
             button.disabled = true;
-            button.style.backgroundColor = "#6c757d";
+            button.textContent = 'Attendance in progress...';
 
-            // Original Bluetooth functionality
             try {
-                // Request Bluetooth device with user consent
-                const device = await navigator.bluetooth.requestDevice({
-                    acceptAllDevices: true, // All Bluetooth devices
-                    optionalServices: []
-                });
+                // 요청 블루투스 권한
+                const bluetoothDevice = await navigator.bluetooth.requestDevice({ acceptAllDevices: true });
+                console.log('Bluetooth device selected:', bluetoothDevice);
 
-                const gattServer = await device.gatt.connect();
-                console.log("Device connected: ", device.name);
+                // 서버에 출석 시작 알림
+                await fetch('/bluetooth/startAttendance', { method: 'POST' });
 
-                // Get all services of the connected device
-                const services = await gattServer.getPrimaryServices();
-                for (const service of services) {
-                    console.log("Service UUID: ", service.uuid);
+                // 블루투스 연결 대기
+                bluetoothDevice.gatt.connect().then(server => {
+                    console.log('Waiting for student data...');
 
-                    // Get all characteristics of each service
-                    const characteristics = await service.getCharacteristics();
-                    for (const characteristic of characteristics) {
-                        console.log("Characteristic UUID: ", characteristic.uuid);
+                    // 예: studentDataCharacteristic 읽기 시뮬레이션
+                    server.getPrimaryService('07883d1e-0a7e-427b-a908-dcd1adf599a2')
+                        .then(service => service.getCharacteristic('1da6c0cd-81fc-4ce9-a63f-4e3eea088851'))
+                        .then(characteristic => characteristic.startNotifications())
+                        .then(characteristic => {
+                            characteristic.addEventListener('characteristicvaluechanged', async (event) => {
+                                const value = new TextDecoder().decode(event.target.value);
+                                const { name, studentId } = JSON.parse(value);
+                                console.log('Received student data:', name, studentId);
 
-                        // Start listening for notifications on the first characteristic
-                        characteristic.startNotifications();
-                        characteristic.addEventListener('characteristicvaluechanged', async event => {
-                            const receivedData = new TextDecoder().decode(event.target.value);
-                            console.log('Received:', receivedData);
-
-                            try {
-                                const response = await fetch('/bluetooth/auth', {
+                                // 서버에 학생 정보 전송
+                                const response = await fetch('/auth', {
                                     method: 'POST',
-                                    headers: {
-                                        'Content-Type': 'application/json'
-                                    },
-                                    body: JSON.stringify({ data: receivedData }) // Send received data to server
+                                    headers: { 'Content-Type': 'application/json' },
+                                    body: JSON.stringify({ name, studentId })
                                 });
 
                                 if (response.ok) {
-                                    console.log('Data sent to server successfully');
-
-                                    const studentList = document.querySelector('#student-list ul');
+                                    // 학생 리스트에 추가
+                                    const list = document.getElementById('studentList');
                                     const listItem = document.createElement('li');
-                                    listItem.textContent = receivedData;
-                                    studentList.appendChild(listItem);
+                                    listItem.textContent = `${name} (${studentId})`;
+                                    list.appendChild(listItem);
                                 }
-                            } catch (error) {
-                                console.error('Error sending data to server:', error);
-                            }
+                            });
                         });
-
-                        break; // Only start notifications for the first available characteristic
-                    }
-                }
-
-                alert('Attendance started! Listening for student connections.');
+                });
             } catch (error) {
                 console.error('Error:', error);
-                alert('Failed to start attendance.');
-                // Re-enable button if Bluetooth initialization fails
-                button.textContent = "Start Attendance";
                 button.disabled = false;
-                button.style.backgroundColor = "#28A745";
+                button.textContent = 'Start Attendance';
             }
         });
     </script>
