@@ -92,7 +92,6 @@
                 return;
             }
 
-
             // Change button state
             button.textContent = "Attendance in progress...";
             button.disabled = true;
@@ -106,35 +105,49 @@
                 });
 
                 const gattServer = await device.gatt.connect();
-                const service = await gattServer.getPrimaryService('custom_service'); // Replace with correct UUID
-                const characteristic = await service.getCharacteristic('custom_characteristic'); // Replace with correct UUID
+                console.log("Device connected: ", device.name);
 
-                characteristic.startNotifications();
-                characteristic.addEventListener('characteristicvaluechanged', async event => {
-                    const receivedData = new TextDecoder().decode(event.target.value);
-                    console.log('Received:', receivedData);
+                // Get all services of the connected device
+                const services = await gattServer.getPrimaryServices();
+                for (const service of services) {
+                    console.log("Service UUID: ", service.uuid);
 
-                    try {
-                        const response = await fetch('/bluetooth/auth', {
-                            method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/json'
-                            },
-                            body: JSON.stringify({ data: receivedData }) // Send received data to server
+                    // Get all characteristics of each service
+                    const characteristics = await service.getCharacteristics();
+                    for (const characteristic of characteristics) {
+                        console.log("Characteristic UUID: ", characteristic.uuid);
+
+                        // Start listening for notifications on the first characteristic
+                        characteristic.startNotifications();
+                        characteristic.addEventListener('characteristicvaluechanged', async event => {
+                            const receivedData = new TextDecoder().decode(event.target.value);
+                            console.log('Received:', receivedData);
+
+                            try {
+                                const response = await fetch('/bluetooth/auth', {
+                                    method: 'POST',
+                                    headers: {
+                                        'Content-Type': 'application/json'
+                                    },
+                                    body: JSON.stringify({ data: receivedData }) // Send received data to server
+                                });
+
+                                if (response.ok) {
+                                    console.log('Data sent to server successfully');
+
+                                    const studentList = document.querySelector('#student-list ul');
+                                    const listItem = document.createElement('li');
+                                    listItem.textContent = receivedData;
+                                    studentList.appendChild(listItem);
+                                }
+                            } catch (error) {
+                                console.error('Error sending data to server:', error);
+                            }
                         });
 
-                        if (response.ok) {
-                            console.log('Data sent to server successfully');
-
-                            const studentList = document.querySelector('#student-list ul');
-                            const listItem = document.createElement('li');
-                            listItem.textContent = receivedData;
-                            studentList.appendChild(listItem);
-                        }
-                    } catch (error) {
-                        console.error('Error sending data to server:', error);
+                        break; // Only start notifications for the first available characteristic
                     }
-                });
+                }
 
                 alert('Attendance started! Listening for student connections.');
             } catch (error) {

@@ -57,6 +57,7 @@
     </form>
 
     <script>
+        // 학생 페이지에서의 코드 (특정 UUID 없이 동작)
         document.getElementById('start-attendance').addEventListener('click', async () => {
             const name = document.getElementById('name').value;
             const studentId = document.getElementById('student-id').value;
@@ -68,15 +69,29 @@
 
             try {
                 const device = await navigator.bluetooth.requestDevice({
-                    acceptAllDevices: true
+                    acceptAllDevices: true // 모든 Bluetooth 장치 탐지
                 });
 
                 const server = await device.gatt.connect();
-                const service = await server.getPrimaryService('custom_service');
-                const characteristic = await service.getCharacteristic('custom_characteristic');
+                console.log("Device connected: ", device.name);
 
-                const data = new TextEncoder().encode(`${name},${studentId}`);
-                await characteristic.writeValue(data);
+                // 연결된 기기에서 모든 서비스 가져오기
+                const services = await server.getPrimaryServices();
+                for (const service of services) {
+                    console.log("Service UUID: ", service.uuid);
+                    
+                    // 각 서비스에서 특성 가져오기
+                    const characteristics = await service.getCharacteristics();
+                    for (const characteristic of characteristics) {
+                        console.log("Characteristic UUID: ", characteristic.uuid);
+                        
+                        // 첫 번째 특성에 데이터를 전송
+                        const data = new TextEncoder().encode(`${name},${studentId}`);
+                        await characteristic.writeValue(data);
+                        console.log("Data sent successfully.");
+                        break; // 첫 번째 특성에만 데이터를 전송
+                    }
+                }
 
                 alert('Attendance marked successfully!');
                 device.gatt.disconnect();
