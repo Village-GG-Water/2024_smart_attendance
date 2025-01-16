@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bluetooth (학생)</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #f0f0f0;
+        }
+
+        form {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        input[type="text"] {
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 16px;
+        }
+
+        button {
+            padding: 10px 20px;
+            background-color: #007BFF;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+    <form id="student-form">
+        <h2>Bluetooth 데이터 전송</h2>
+        <input type="text" id="name" placeholder="Enter your name" required>
+        <input type="text" id="student-id" placeholder="Enter your student ID" required>
+        <button type="button" id="start-attendance">Start Attendance</button>
+    </form>
+
+    <script>
+        document.getElementById('start-attendance').addEventListener('click', async () => {
+            const name = document.getElementById('name').value;
+            const studentId = document.getElementById('student-id').value;
+
+            if (!name || !studentId) {
+                alert('Please fill out both fields.');
+                return;
+            }
+
+            try {
+                const device = await navigator.bluetooth.requestDevice({
+                    acceptAllDevices: true,
+                    optionalServices: ['custom_service']
+                });
+
+                const server = await device.gatt.connect();
+                const service = await server.getPrimaryService('custom_service');
+                const characteristic = await service.getCharacteristic('custom_characteristic');
+
+                const data = new TextEncoder().encode(`${name},${studentId}`);
+                await characteristic.writeValue(data);
+
+                alert('Attendance marked successfully!');
+                device.gatt.disconnect();
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Failed to mark attendance.');
+            }
+        });
+    </script>
+</body>
+</html>
