@@ -101,7 +101,8 @@
             try {
                 // Request Bluetooth device with user consent
                 const device = await navigator.bluetooth.requestDevice({
-                    acceptAllDevices: true // All Bluetooth devices
+                    acceptAllDevices: true, // All Bluetooth devices
+                    optionalServices: []
                 });
 
                 const gattServer = await device.gatt.connect();

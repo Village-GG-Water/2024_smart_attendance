@@ -69,7 +69,8 @@
 
             try {
                 const device = await navigator.bluetooth.requestDevice({
-                    acceptAllDevices: true // 모든 Bluetooth 장치 탐지
+                    acceptAllDevices: true, // 모든 Bluetooth 장치 탐지
+                    optionalServices: []
                 });
 
                 const server = await device.gatt.connect();
