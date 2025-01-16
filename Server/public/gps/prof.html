@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GPS (교수)</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+      background-color: #f4f4f9;
+    }
+
+    .container {
+      text-align: center;
+      padding: 20px;
+      border-radius: 8px;
+      background-color: #fff;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      width: 300px;
+    }
+
+    input[type="number"] {
+      padding: 10px;
+      margin: 10px;
+      width: 100%;
+      border-radius: 5px;
+      border: 1px solid #ddd;
+    }
+
+    button {
+      padding: 10px 20px;
+      background-color: #4CAF50;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background-color: #45a049;
+    }
+
+    #statusMessage {
+      margin-top: 15px;
+      color: green;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>GPS 데이터 전송</h1>
+    <label for="rangeInput">인증 범위 (미터):</label>
+    <input type="number" id="rangeInput" placeholder="범위 입력">
+    <button id="sendButton">전송</button>
+    <p id="statusMessage"></p>
+  </div>
+
+  <script>
+    document.getElementById('sendButton').addEventListener('click', () => {
+      const rangeInput = document.getElementById('rangeInput').value;
+
+      // 인증 범위가 유효한지 확인
+      if (!rangeInput || isNaN(rangeInput) || rangeInput <= 0) {
+        alert('올바른 인증 범위를 입력하세요.');
+        return;
+      }
+
+      // GPS 데이터를 가져오기
+      if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition((position) => {
+          const latitude = position.coords.latitude;
+          const longitude = position.coords.longitude;
+
+          // 서버로 데이터를 전송
+          const data = {
+            latitude: latitude,
+            longitude: longitude,
+            range: rangeInput
+          };
+
+          console.log("data to be sent : ", data);
+
+          // 서버에 데이터 전송
+          fetch('/gps/prof', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(data)
+          })
+          .then((response) => {
+            document.getElementById('statusMessage').textContent = '데이터가 성공적으로 전송되었습니다.';
+          })
+          .catch(() => {
+            document.getElementById('statusMessage').textContent = '데이터 전송에 실패했습니다.';
+          });
+        }, () => {
+          alert('GPS 정보를 가져올 수 없습니다. GPS 권한을 확인하세요.');
+        });
+      } else {
+        alert('이 브라우저는 GPS를 지원하지 않습니다.');
+      }
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GPS (학생)</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      background-color: #f4f4f9;
+    }
+    .form-container {
+      background: #fff;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+      width: 300px;
+    }
+    .form-container h2 {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    .form-container input {
+      width: 100%;
+      padding: 10px;
+      margin-bottom: 10px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+    .form-container button {
+      width: 100%;
+      padding: 10px;
+      background-color: #007bff;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    .form-container button:hover {
+      background-color: #0056b3;
+    }
+    .message {
+      text-align: center;
+      margin-top: 10px;
+      color: #28a745;
+    }
+    .error {
+      color: #dc3545;
+    }
+  </style>
+</head>
+<body>
+  <div class="form-container">
+    <h2>GPS 데이터 전송</h2>
+    <input type="text" id="name" placeholder="Enter your name" required>
+    <input type="text" id="studentId" placeholder="Enter your student ID" required>
+    <button id="send-btn">Start Attendance</button>
+    <div id="message" class="message"></div>
+  </div>
+
+  <script>
+    document.getElementById('send-btn').addEventListener('click', async () => {
+      const name = document.getElementById('name').value.trim();
+      const studentId = document.getElementById('studentId').value.trim();
+      const messageEl = document.getElementById('message');
+
+      if (!name || !studentId) {
+        messageEl.textContent = '이름과 번호를 모두 입력하세요.';
+        messageEl.classList.add('error');
+        return;
+      }
+
+      if (!navigator.geolocation) {
+        messageEl.textContent = '이 브라우저는 GPS를 지원하지 않습니다.';
+        messageEl.classList.add('error');
+        return;
+      }
+
+      messageEl.textContent = 'GPS 데이터를 가져오는 중...';
+      messageEl.classList.remove('error');
+
+      navigator.geolocation.getCurrentPosition(async (position) => {
+        const latitude = position.coords.latitude;
+        const longitude = position.coords.longitude;
+
+        const data = {
+          name,
+          studentId,
+          data: {
+            latitude,
+            longitude
+          }
+        };
+        console.log("data to be sent : ", data);
+
+        try {
+          const response = await fetch('/gps/student', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(data)
+          });
+
+          if (response.ok) {
+            messageEl.textContent = '데이터가 성공적으로 전송되었습니다!';
+          } else {
+            messageEl.textContent = '서버에서 오류가 발생했습니다.';
+            messageEl.classList.add('error');
+          }
+        } catch (error) {
+          messageEl.textContent = '전송 중 오류가 발생했습니다.';
+          messageEl.classList.add('error');
+        }
+      }, (error) => {
+        messageEl.textContent = 'GPS 데이터를 가져오지 못했습니다.';
+        messageEl.classList.add('error');
+      });
+    });
+  </script>
+</body>
+</html>
