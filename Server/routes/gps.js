@@ -48,6 +48,7 @@ router.post('/student', async function (req, res, next) {
   // 인증 처리
   let distance = calculateDistance(pLatitude, pLongitude, sLatitude, sLongitude, mRange);
   if (distance > mRange) {
+    console.log("인증 실패! distance : ", distance);
     return res.sendStatus(400); // 범위 밖, 인증 실패
   }
   // 인증 후 csv 파일에 저장 (가장 최근 파일에...)
