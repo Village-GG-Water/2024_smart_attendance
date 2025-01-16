@@ -59,8 +59,11 @@
 
                 // 블루투스 연결 후 데이터 전송
                 const server = await bluetoothDevice.gatt.connect();
+                console.log("1");
                 const service = await server.getPrimaryService(serviceUuid);
+                console.log("2");
                 const characteristic = await service.getCharacteristic(dataUuid);
+                console.log("3");
 
                 // JSON 데이터 생성 및 전송
                 const data = new TextEncoder().encode(JSON.stringify({ name, studentId }));
