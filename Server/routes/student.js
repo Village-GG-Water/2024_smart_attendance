@@ -35,9 +35,9 @@ router.post('/:subjectId', async function (req, res, next) {
   if (result1.length != 1) return res.sendStatus(500);
   // console.log()
   console.log(
-    '(학생) 출석 코드 수신: 이름, 학번, startTime, endTime, 출석코드: '
+    '(학생) 출석 코드 수신'
   );
-  console.log(studentName, studentId, startTime, endTime, attendanceCode);
+  console.log("name: ", studentName, ", id: ", studentId, ", startTime: ", startTime, ", endTime: ", endTime, ", code: ", attendanceCode);
   // #1. 유효한 학생인지 검증 => X! 그냥 있으면 데이터 바꿔주고 없으면 추가!
   let result2 = result1[0].students.filter((x) => x.id == studentId);
   if (result2.length != 1) {
@@ -59,7 +59,7 @@ router.post('/:subjectId', async function (req, res, next) {
   let files;
   try {
     files = await fsPromise.readdir('.');
-  } catch (e) {
+  } catch (err) {
     console.error('디렉토리를 읽는 중 오류가 발생했습니다:', err);
     return res.sendStatus(500);
   }
@@ -93,12 +93,12 @@ router.post('/:subjectId', async function (req, res, next) {
       .on('finish', () => {
         console.log(`${csvFilePath} - CSV 파일 저장 완료`);
         ws.close();
-        res.sendStatus(200);
+        return res.sendStatus(200);
       })
       .on('error', (err) => {
         console.error(`${csvFilePath} - CSV 파일 저장 중 오류 발생: `, err);
         ws.close();
-        res.sendStatus(200); // 인증은 성공했으니 200 응답
+        return res.sendStatus(200); // 인증은 성공했으니 200 응답
       });
   else
     fastcsv
@@ -110,12 +110,12 @@ router.post('/:subjectId', async function (req, res, next) {
       .on('finish', () => {
         console.log(`${csvFilePath} - CSV 파일 저장 완료`);
         ws.close();
-        res.sendStatus(200);
+        return res.sendStatus(200);
       })
       .on('error', (err) => {
         console.error(`${csvFilePath} - CSV 파일 저장 중 오류 발생: `, err);
         ws.close();
-        res.sendStatus(200); // 인증은 성공했으니 200 응답
+        return res.sendStatus(200); // 인증은 성공했으니 200 응답
       });
 });
 
