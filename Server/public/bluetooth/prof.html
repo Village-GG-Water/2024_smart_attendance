@@ -53,7 +53,7 @@
 
                     // 예: studentDataCharacteristic 읽기 시뮬레이션
                     server.getPrimaryService('07883d1e-0a7e-427b-a908-dcd1adf599a2')
-                        .then(service => service.getCharacteristic('1da6c0cd-81fc-4ce9-a63f-4e3eea088851'))
+                        .then(service => service.getCharacteristic('ed60b794-efd8-4d29-8730-4b69a8238bca'))
                         .then(characteristic => characteristic.startNotifications())
                         .then(characteristic => {
                             characteristic.addEventListener('characteristicvaluechanged', async (event) => {
