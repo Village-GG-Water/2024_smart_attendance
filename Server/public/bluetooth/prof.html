@@ -92,6 +92,7 @@
                 return;
             }
 
+
             // Change button state
             button.textContent = "Attendance in progress...";
             button.disabled = true;
@@ -101,8 +102,7 @@
             try {
                 // Request Bluetooth device with user consent
                 const device = await navigator.bluetooth.requestDevice({
-                    acceptAllDevices: true, // All Bluetooth devices
-                    optionalServices: ['custom_service'] // You can specify UUIDs if needed
+                    acceptAllDevices: true // All Bluetooth devices
                 });
 
                 const gattServer = await device.gatt.connect();
