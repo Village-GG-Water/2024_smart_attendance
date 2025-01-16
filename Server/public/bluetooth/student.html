@@ -3,70 +3,102 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Student Attendance</title>
+    <title>Bluetooth (학생)</title>
     <style>
         body {
             font-family: Arial, sans-serif;
-            text-align: center;
-            margin: 50px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #f0f0f0;
         }
-        input {
+
+        form {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        input[type="text"] {
             padding: 10px;
-            margin: 10px 0;
+            border: 1px solid #ccc;
+            border-radius: 4px;
             font-size: 16px;
-            width: 80%;
         }
+
         button {
             padding: 10px 20px;
+            background-color: #007BFF;
+            color: white;
+            border: none;
+            border-radius: 4px;
             font-size: 16px;
             cursor: pointer;
         }
-        button:disabled {
-            background-color: gray;
-            cursor: not-allowed;
+
+        button:hover {
+            background-color: #0056b3;
         }
     </style>
 </head>
 <body>
-    <h1>Student Attendance Page</h1>
-    <input id="name" type="text" placeholder="Enter your name" />
-    <input id="studentId" type="text" placeholder="Enter your student ID" />
-    <button id="startAttendance">Start Attendance</button>
+    <form id="student-form">
+        <h2>Bluetooth 데이터 전송</h2>
+        <input type="text" id="name" placeholder="Enter your name" required>
+        <input type="text" id="student-id" placeholder="Enter your student ID" required>
+        <button type="button" id="start-attendance">Start Attendance</button>
+    </form>
 
     <script>
-        document.getElementById('startAttendance').addEventListener('click', async function () {
-            const button = this;
+        // 학생 페이지에서의 코드 (특정 UUID 없이 동작)
+        document.getElementById('start-attendance').addEventListener('click', async () => {
             const name = document.getElementById('name').value;
-            const studentId = document.getElementById('studentId').value;
+            const studentId = document.getElementById('student-id').value;
 
             if (!name || !studentId) {
-                alert('Please fill in all fields.');
+                alert('Please fill out both fields.');
                 return;
             }
 
-            button.disabled = true;
-            button.textContent = 'Connecting...';
-
             try {
-                // 요청 블루투스 권한
-                const bluetoothDevice = await navigator.bluetooth.requestDevice({ acceptAllDevices: true });
-                console.log('Connecting to:', bluetoothDevice);
+                const device = await navigator.bluetooth.requestDevice({
+                    acceptAllDevices: true, // 모든 Bluetooth 장치 탐지
+                    optionalServices: []
+                });
 
-                // 블루투스 연결 후 데이터 전송
-                const server = await bluetoothDevice.gatt.connect();
-                const service = await server.getPrimaryService('student_service_uuid');
-                const characteristic = await service.getCharacteristic('student_data_uuid');
+                const server = await device.gatt.connect();
+                console.log("Device connected: ", device.name);
 
-                // JSON 데이터 생성 및 전송
-                const data = new TextEncoder().encode(JSON.stringify({ name, studentId }));
-                await characteristic.writeValue(data);
+                // 연결된 기기에서 모든 서비스 가져오기
+                const services = await server.getPrimaryServices();
+                for (const service of services) {
+                    console.log("Service UUID: ", service.uuid);
+                    
+                    // 각 서비스에서 특성 가져오기
+                    const characteristics = await service.getCharacteristics();
+                    for (const characteristic of characteristics) {
+                        console.log("Characteristic UUID: ", characteristic.uuid);
+                        
+                        // 첫 번째 특성에 데이터를 전송
+                        const data = new TextEncoder().encode(`${name},${studentId}`);
+                        await characteristic.writeValue(data);
+                        console.log("Data sent successfully.");
+                        break; // 첫 번째 특성에만 데이터를 전송
+                    }
+                }
 
-                console.log('Data sent to professor:', { name, studentId });
-                button.textContent = 'Attendance finished';
+                alert('Attendance marked successfully!');
+                device.gatt.disconnect();
             } catch (error) {
                 console.error('Error:', error);
-                button.disabled = false;
-                button.textContent = 'Start Attendance';
+                alert('Failed to mark attendance.');
             }
         });
     </script>
