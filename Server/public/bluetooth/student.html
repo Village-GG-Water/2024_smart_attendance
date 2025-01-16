@@ -68,8 +68,7 @@
 
             try {
                 const device = await navigator.bluetooth.requestDevice({
-                    acceptAllDevices: true,
-                    optionalServices: ['custom_service']
+                    acceptAllDevices: true
                 });
 
                 const server = await device.gatt.connect();
