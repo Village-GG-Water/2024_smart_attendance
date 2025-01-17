@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Bluetooth Sender</title>
+</head>
+<body>
+  <h1>Bluetooth Sender</h1>
+  <form id="dataForm">
+    <label for="name">Name:</label>
+    <input type="text" id="name" required>
+    <br>
+    <label for="studentId">Student ID:</label>
+    <input type="text" id="studentId" required>
+    <br>
+    <button type="submit">Send Data</button>
+  </form>
+
+  <script>
+    let bluetoothDevice;
+    let gattServer;
+    let sendCharacteristic;
+
+    async function connectToDevice() {
+      try {
+        bluetoothDevice = await navigator.bluetooth.requestDevice({
+          acceptAllDevices: true,
+          optionalServices: [] // 자동으로 탐색하기 위해 빈 배열로 설정
+        });
+
+        gattServer = await bluetoothDevice.gatt.connect();
+        const services = await gattServer.getPrimaryServices();
+        console.log("Available Services:", services);
+
+        for (const service of services) {
+          const characteristics = await service.getCharacteristics();
+          console.log(`Service UUID: ${service.uuid}`);
+          console.log("Characteristics:", characteristics);
+
+          // 원하는 특성을 찾으면 설정
+          for (const characteristic of characteristics) {
+            if (characteristic.properties.write) { // write 가능한 특성 탐색
+              sendCharacteristic = characteristic;
+              console.log(`Selected Write Characteristic: ${characteristic.uuid}`);
+              return;
+            }
+          }
+        }
+
+        alert("Write characteristic not found!");
+      } catch (error) {
+        console.error('Error connecting to device:', error);
+      }
+    }
+
+    document.getElementById('dataForm').addEventListener('submit', async (event) => {
+      event.preventDefault();
+      const name = document.getElementById('name').value;
+      const studentId = document.getElementById('studentId').value;
+      const data = `Name: ${name}, Student ID: ${studentId}`;
+
+      try {
+        if (!sendCharacteristic) {
+          await connectToDevice();
+        }
+
+        if (sendCharacteristic) {
+          const encoder = new TextEncoder();
+          await sendCharacteristic.writeValue(encoder.encode(data));
+          alert('Data sent successfully!');
+        }
+      } catch (error) {
+        console.error('Error sending data:', error);
+      }
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Bluetooth Receiver</title>
+</head>
+<body>
+  <h1>Bluetooth Receiver</h1>
+  <button id="connect">Connect to Device</button>
+  <p id="receivedData">Received Data: None</p>
+
+  <script>
+    let bluetoothDevice;
+    let gattServer;
+    let receiveCharacteristic;
+
+    async function connectToDevice() {
+      try {
+        bluetoothDevice = await navigator.bluetooth.requestDevice({
+          acceptAllDevices: true,
+          optionalServices: [] // 자동으로 탐색하기 위해 빈 배열로 설정
+        });
+
+        gattServer = await bluetoothDevice.gatt.connect();
+        const services = await gattServer.getPrimaryServices();
+        console.log("Available Services:", services);
+
+        for (const service of services) {
+          const characteristics = await service.getCharacteristics();
+          console.log(`Service UUID: ${service.uuid}`);
+          console.log("Characteristics:", characteristics);
+
+          // 읽기/알림 가능한 특성을 찾으면 설정
+          for (const characteristic of characteristics) {
+            if (characteristic.properties.notify || characteristic.properties.read) {
+              receiveCharacteristic = characteristic;
+              console.log(`Selected Receive Characteristic: ${characteristic.uuid}`);
+              await receiveCharacteristic.startNotifications();
+              receiveCharacteristic.addEventListener('characteristicvaluechanged', (event) => {
+                const decoder = new TextDecoder();
+                const data = decoder.decode(event.target.value);
+                document.getElementById('receivedData').textContent = `Received Data: ${data}`;
+              });
+              return;
+            }
+          }
+        }
+
+        alert("Receive characteristic not found!");
+      } catch (error) {
+        console.error('Error connecting to device:', error);
+      }
+    }
+
+    document.getElementById('connect').addEventListener('click', async () => {
+      await connectToDevice();
+    });
+  </script>
+</body>
+</html>
