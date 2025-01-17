@@ -26,7 +26,12 @@
       try {
         bluetoothDevice = await navigator.bluetooth.requestDevice({
           acceptAllDevices: true,
-          optionalServices: [] // 자동으로 탐색하기 위해 빈 배열로 설정
+          optionalServices: ['0000180a-0000-1000-8000-00805f9b34fb', // 디바이스 정보
+                            '0000180f-0000-1000-8000-00805f9b34fb', // 배터리 서비스
+                            '0000180d-0000-1000-8000-00805f9b34fb', // 심박수
+                            '0000181a-0000-1000-8000-00805f9b34fb',  // 환경 감지
+                            '0000181c-0000-1000-8000-00805f9b34fb'
+                            ]
         });
 
         gattServer = await bluetoothDevice.gatt.connect();
