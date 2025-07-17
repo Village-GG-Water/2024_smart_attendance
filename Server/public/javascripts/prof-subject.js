@@ -1,7 +1,7 @@
 let buttonFlag = false;
 
 async function changeButtonOn(btn) {
-  btn.innerHTML = '음파 생성 중';
+  btn.innerHTML = 'Attendance check in progress…';
   btn.style.backgroundColor = '#4CAF50';
   buttonFlag = true;
   // 서버 csv 기록 위한 요청
@@ -19,13 +19,13 @@ async function changeButtonOn(btn) {
   const res = await fetch(request);
   // 잘 갔으면, 서버에서 200 응답
   if (res.status != 200) {
-    alert('오류 발생, 확인해주세요.');
+    alert('Error!');
   }
-  startAttendanceCheck(btn.id);
+  await startAttendanceCheck(btn.id);
 }
 
 function changeButtonOff(btn) {
-  btn.innerHTML = '출석 초기화 및 새로시작';
+  btn.innerHTML = 'Start';
   btn.style.backgroundColor = '#00FFFF';
   buttonFlag = false;
 }
@@ -37,7 +37,7 @@ async function resetAttendees(btn) {
   const res = await fetch(request);
   // 리셋 잘 됐으면 200 응답
   if (res.status != 200) {
-    alert('출석 정보 리셋 오류 발생, 확인해주세요.');
+    alert('Error!');
     return false;
   }
   return true;
@@ -56,9 +56,9 @@ async function buttonClickHandler() {
 
 var btn = document.getElementsByClassName('button_attendance')[0];
 btn.addEventListener('click', buttonClickHandler);
-var attendanceCodeDisplay = document.getElementsByClassName(
-  'current_attendance_code'
-)[0];
+// var attendanceCodeDisplay = document.getElementsByClassName(
+//   'current_attendance_code'
+// )[0];
 
 // 1초 간격 출석 학생 목록 업데이트
 const subjectId = btn.id;
@@ -73,10 +73,10 @@ document.addEventListener('DOMContentLoaded', function () {
         let count = 0; // 출석자 수 초기화
 
         data.forEach((attendee) => {
-          const subDiv = document.createElement('div');
-          subDiv.textContent = `이름: ${attendee.name}, ID: ${attendee.id}`;
-          attendeeList.appendChild(subDiv);
           count++;
+          const subDiv = document.createElement('div');
+          subDiv.textContent = `${count}) ${attendee.name} (${attendee.id})`;
+          attendeeList.appendChild(subDiv);
         });
         attendeeCount.textContent = `Number of Attendees: ${count}`;
       })
@@ -92,10 +92,10 @@ document.addEventListener('DOMContentLoaded', function () {
  *
  * @param {number} subjectid 과목코드
  */
-function startAttendanceCheck(subjectid) {
+async function startAttendanceCheck(subjectid) {
   let attendanceDuration = 300; //second
 
-  playSignal(subjectid, attendanceDuration, 0);
+  await playSignal(subjectid, attendanceDuration, 0);
 }
 
 /**
@@ -106,7 +106,13 @@ function startAttendanceCheck(subjectid) {
 async function playSignal(subjectid, attendanceDuration, count) {
   const sessionTime = 1;
 
-  if (attendanceDuration / sessionTime <= count) return;
+  if (attendanceDuration / sessionTime <= count) {
+      // attendance check completed
+      btn.innerHTML = 'Completed';
+      btn.style.cursor = 'none';
+      btn.style.backgroundColor = 'blue';
+      return;
+  }
   if (buttonFlag == false) {
     changeButtonOff(btn);
     return;
@@ -116,14 +122,14 @@ async function playSignal(subjectid, attendanceDuration, count) {
   let currentAttendanceCode = generateAttendanceCode();
   //let currentAttendanceCode = '10011010010';
   const currentAttendanceCodeDecimal = parseInt(currentAttendanceCode, 2);
-  attendanceCodeDisplay.innerHTML =
-    currentAttendanceCodeDecimal < 1000
-      ? `0${currentAttendanceCodeDecimal}`
-      : currentAttendanceCodeDecimal < 100
-      ? `00${currentAttendanceCodeDecimal}`
-      : currentAttendanceCodeDecimal < 10
-      ? `000${currentAttendanceCodeDecimal}`
-      : `${currentAttendanceCodeDecimal}`;
+  // attendanceCodeDisplay.innerHTML =
+  //   currentAttendanceCodeDecimal < 1000
+  //     ? `0${currentAttendanceCodeDecimal}`
+  //     : currentAttendanceCodeDecimal < 100
+  //     ? `00${currentAttendanceCodeDecimal}`
+  //     : currentAttendanceCodeDecimal < 10
+  //     ? `000${currentAttendanceCodeDecimal}`
+  //     : `${currentAttendanceCodeDecimal}`;
   const requestForm = {
     subjectId: subjectid,
     attendanceCode: currentAttendanceCodeDecimal,

@@ -5,13 +5,13 @@ let endTime = 0;
 
 function changeButtonOn(btn) {
   buttonFlag = true;
-  btn.innerHTML = '출석 인증 중';
+  btn.innerHTML = 'Attendance check in progress…';
   btn.style.backgroundColor = '#4CAF50';
 }
 
 function changeButtonOff(btn) {
   buttonFlag = false;
-  btn.innerHTML = '출석 시작';
+  btn.innerHTML = 'Start';
   btn.style.backgroundColor = '#00FFFF';
 }
 
@@ -20,23 +20,23 @@ function buttonClickHandler() {
   if (buttonFlag == false) {
     const name = document.getElementById('student_name').value;
     const studentNumber = document.getElementById('student_id').value;
-    const seat = document.getElementById('seat').value;
+    // const seat = document.getElementById('seat').value;
     if (name == '') {
-      alert('이름을 입력해주세요.');
+      alert('Please enter your name.');
       return;
     }
     if (studentNumber == '') {
-      alert('학번을 입력해주세요.');
+      alert('Please enter your student id.');
       return;
     }
-    if (seat == '') {
-      alert('좌석을 입력해주세요.');
-      return;
-    }
+    // if (seat == '') {
+    //   alert('좌석을 입력해주세요.');
+    //   return;
+    // }
     changeButtonOn(this);
     startTime = Date.now();
     userStartAudio();
-    startAttendanceCheck(btn.id, name, studentNumber, seat);
+    startAttendanceCheck(btn.id, name, studentNumber, 'seat');
     // 여기서 서버 검증 결과에 따라 출석 실패/성공 띄우기
   } else {
     changeButtonOff(this);
@@ -96,10 +96,10 @@ async function startAttendanceCheck(subjectid, name, studentNumber, seat) {
 
     // 인증성공이면 서버에서 200 응답
     if (res.status == 200) {
-      btn.innerHTML = '출석 완료';
+      btn.innerHTML = 'Completed';
       btn.style.cursor = 'none';
       btn.style.backgroundColor = 'blue';
-      alert('출석이 완료되었습니다.');
+      // alert('출석이 완료되었습니다.');
       isDoneAttendanceCheck = true;
       break;
     }
